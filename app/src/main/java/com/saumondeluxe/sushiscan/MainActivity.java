@@ -17,10 +17,8 @@ public class MainActivity extends AppCompatActivity {
 
         mangaImage = findViewById(R.id.mangaImage);
 
-        String imageUrl = "https://upload.wikimedia.org/wikipedia/fr/2/2a/OnePiece72.png";
+        String imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Yes_Check_Circle.svg/2048px-Yes_Check_Circle.svg.png";
+        Glide.with(this).load(imageUrl).into(mangaImage);
 
-        Glide.with(this)
-                .load(imageUrl)
-                .into(mangaImage);
     }
 }
