@@ -5,6 +5,30 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <!-- Section des dernières lectures -->
+    <LinearLayout
+        android:id="@+id/recentMangaSection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="8dp">
+        
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Dernières lectures"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:padding="8dp"/>
+            
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recentMangaRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingBottom="8dp"/>
+    </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

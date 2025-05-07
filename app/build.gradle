@@ -55,5 +55,14 @@ dependencies {
     
     // ViewPager2 pour la navigation entre les pages de scans
     implementation 'androidx.viewpager2:viewpager2:1.0.0'
+    
+    // Room pour le stockage local des données
+    implementation 'androidx.room:room-runtime:2.6.1'
+    annotationProcessor 'androidx.room:room-compiler:2.6.1'
+    
+    // LiveData et ViewModel
+    implementation 'androidx.lifecycle:lifecycle-viewmodel:2.6.2'
+    implementation 'androidx.lifecycle:lifecycle-livedata:2.6.2'
+    implementation 'androidx.lifecycle:lifecycle-common-java8:2.6.2'
 
 }
