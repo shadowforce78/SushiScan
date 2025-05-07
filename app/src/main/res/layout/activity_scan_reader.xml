@@ -7,9 +7,10 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp"
         android:background="#333333"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:translationY="10dp">
 
         <Button
             android:id="@+id/backButton"
@@ -21,19 +22,19 @@
             android:id="@+id/titleTextView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:layout_marginStart="16dp"
+            android:layout_weight="1"
+            android:gravity="center"
             android:textColor="#FFFFFF"
             android:textSize="16sp"
-            android:gravity="center"
             android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/pageCounterTextView"
+        <Spinner
+            android:id="@+id/chapterSpinner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#FFFFFF"
-            android:textSize="14sp" />
+            android:backgroundTint="#FFFFFF"
+            android:minWidth="100dp" />
     </LinearLayout>
 
     <FrameLayout
@@ -41,10 +42,11 @@
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <androidx.viewpager2.widget.ViewPager2
-            android:id="@+id/scanViewPager"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/scanRecyclerView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:background="#000000" />
 
         <ProgressBar
             android:id="@+id/loadingProgressBar"

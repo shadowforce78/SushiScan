@@ -9,7 +9,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="16dp">
+        android:padding="16dp"
+        android:translationY="10dp">
 
         <EditText
             android:id="@+id/searchEditText"
@@ -17,8 +18,9 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:hint="Entrez le nom d'un anime"
+            android:imeOptions="actionSearch"
             android:inputType="text"
-            android:imeOptions="actionSearch" />
+            android:minHeight="48dp" />
 
         <Button
             android:id="@+id/searchButton"
@@ -33,7 +35,7 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:paddingLeft="16dp"
-        android:paddingRight="16dp"/>
+        android:paddingRight="16dp" />
 
     <ScrollView
         android:id="@+id/detailScrollView"
