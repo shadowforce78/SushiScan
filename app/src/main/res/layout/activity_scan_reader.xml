@@ -1,62 +1,118 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="#000000">
 
-    <LinearLayout
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/readerToolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#333333"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        android:translationY="10dp">
+        android:layout_height="?attr/actionBarSize"
+        android:background="#121212"
+        app:contentInsetStart="0dp">
 
-        <Button
-            android:id="@+id/backButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Retour" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="8dp">
 
-        <TextView
-            android:id="@+id/titleTextView"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            <ImageButton
+                android:id="@+id/backButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="8dp"
+                android:src="@android:drawable/ic_menu_revert"
+                android:tint="#FFFFFF"
+                android:contentDescription="Retour" />
 
-        <Spinner
-            android:id="@+id/chapterSpinner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:backgroundTint="#FFFFFF"
-            android:minWidth="100dp" />
-            
-        <ImageButton
-            android:id="@+id/downloadButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@android:drawable/ic_menu_save"
-            android:contentDescription="Télécharger le chapitre"
-            android:layout_marginStart="8dp"
-            android:background="?android:attr/selectableItemBackground"
-            android:tint="#FFFFFF" />
-    </LinearLayout>
+            <TextView
+                android:id="@+id/titleTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:gravity="start"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/chapterButton"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:text="Chapitre 1"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp"
+                app:strokeColor="#FFFFFF"
+                app:cornerRadius="20dp" />
+        </LinearLayout>
+    </androidx.appcompat.widget.Toolbar>
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/scanRecyclerView"
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/scanViewPager"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="#000000" />
+
+        <LinearLayout
+            android:id="@+id/paginationOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="#80000000"
+            android:padding="8dp"
+            android:gravity="center">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/prevButton"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Précédent"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp"
+                app:icon="@android:drawable/ic_media_previous"
+                app:iconTint="#FFFFFF"
+                app:strokeColor="#FFFFFF"
+                app:cornerRadius="20dp" />
+
+            <TextView
+                android:id="@+id/pageCounterTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:text="0/0" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/nextButton"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Suivant"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp"
+                app:icon="@android:drawable/ic_media_next"
+                app:iconTint="#FFFFFF"
+                app:iconGravity="end"
+                app:strokeColor="#FFFFFF"
+                app:cornerRadius="20dp" />
+        </LinearLayout>
 
         <ProgressBar
             android:id="@+id/loadingProgressBar"
@@ -72,40 +128,7 @@
             android:gravity="center"
             android:padding="16dp"
             android:textSize="16sp"
+            android:textColor="#FFFFFF"
             android:visibility="gone" />
-            
-        <ProgressBar
-            android:id="@+id/downloadProgressBar"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:visibility="gone"
-            android:padding="8dp" />
     </FrameLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:padding="8dp"
-        android:translationY="-10dp">
-
-        <Button
-            android:id="@+id/prevButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Précédent" />
-
-        <Space
-            android:layout_width="16dp"
-            android:layout_height="wrap_content" />
-
-        <Button
-            android:id="@+id/nextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Suivant" />
-    </LinearLayout>
 </LinearLayout>

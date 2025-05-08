@@ -1,15 +1,21 @@
 package com.saumondeluxe.sushiscan.database;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Entité pour représenter un manga dans la base de données
  */
 @Entity(tableName = "mangas", indices = { @Index(value = { "name" }, unique = true) })
-public class MangaEntity {
+public class MangaEntity implements Parcelable {
 
     @PrimaryKey(autoGenerate = true)
     private long id;
@@ -29,10 +35,16 @@ public class MangaEntity {
     private int lastReadPagePosition;
     private String lastReadChapterName;
     private String scanTypeUrl; // URL pour accéder au type de scan (ex: "scan", "vf", etc.)
+    private List<String> genres;
+    private boolean isDownloaded;
+    private long lastReadTimestamp;
 
     // Constructeurs
     public MangaEntity() {
         // Constructeur vide requis par Room
+        this.genres = new ArrayList<>();
+        this.lastReadTimestamp = System.currentTimeMillis();
+        this.lastReadChapterNumber = 1;
     }
 
     @Ignore
@@ -42,7 +54,45 @@ public class MangaEntity {
         this.lastReadTime = System.currentTimeMillis();
         this.lastUpdateTime = System.currentTimeMillis();
         this.lastReadPagePosition = 0;
+        this.isFavorite = false;
+        this.isDownloaded = false;
+        this.lastReadChapterNumber = 0;
+        this.lastReadTimestamp = 0;
+        this.genres = new ArrayList<>();
     }
+
+    public MangaEntity(String name, String imageUrl, String scanTypeUrl) {
+        this.name = name;
+        this.imageUrl = imageUrl;
+        this.scanTypeUrl = scanTypeUrl;
+        this.genres = new ArrayList<>();
+        this.lastReadTimestamp = System.currentTimeMillis();
+        this.lastReadChapterNumber = 1;
+    }
+
+    protected MangaEntity(Parcel in) {
+        name = in.readString();
+        imageUrl = in.readString();
+        scanTypeUrl = in.readString();
+        description = in.readString();
+        genres = in.createStringArrayList();
+        isDownloaded = in.readByte() != 0;
+        isFavorite = in.readByte() != 0;
+        lastReadTimestamp = in.readLong();
+        lastReadChapterNumber = in.readInt();
+    }
+
+    public static final Creator<MangaEntity> CREATOR = new Creator<MangaEntity>() {
+        @Override
+        public MangaEntity createFromParcel(Parcel in) {
+            return new MangaEntity(in);
+        }
+
+        @Override
+        public MangaEntity[] newArray(int size) {
+            return new MangaEntity[size];
+        }
+    };
 
     // Getters et Setters
     public long getId() {
@@ -99,6 +149,14 @@ public class MangaEntity {
 
     public void setFavorite(boolean favorite) {
         isFavorite = favorite;
+    }
+
+    public boolean isDownloaded() {
+        return isDownloaded;
+    }
+
+    public void setDownloaded(boolean downloaded) {
+        isDownloaded = downloaded;
     }
 
     public long getLastReadTime() {
@@ -158,6 +216,22 @@ public class MangaEntity {
         this.scanTypeUrl = scanTypeUrl;
     }
 
+    public List<String> getGenres() {
+        return genres;
+    }
+
+    public void setGenres(List<String> genres) {
+        this.genres = genres;
+    }
+
+    public long getLastReadTimestamp() {
+        return lastReadTimestamp;
+    }
+
+    public void setLastReadTimestamp(long lastReadTimestamp) {
+        this.lastReadTimestamp = lastReadTimestamp;
+    }
+
     /**
      * Met à jour les informations de lecture pour ce manga
      * 
@@ -175,5 +249,23 @@ public class MangaEntity {
         this.lastReadPagePosition = pagePosition;
         this.scanTypeUrl = scanTypeUrl;
         this.lastReadTime = System.currentTimeMillis();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(name);
+        dest.writeString(imageUrl);
+        dest.writeString(scanTypeUrl);
+        dest.writeString(description);
+        dest.writeStringList(genres);
+        dest.writeByte((byte) (isDownloaded ? 1 : 0));
+        dest.writeByte((byte) (isFavorite ? 1 : 0));
+        dest.writeLong(lastReadTimestamp);
+        dest.writeInt(lastReadChapterNumber);
     }
 }

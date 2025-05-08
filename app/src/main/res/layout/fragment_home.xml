@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#121212">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        <!-- Section des mangas populaires -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="Populaires"
+            android:textColor="#E91E63"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/popularMangaRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:orientation="horizontal"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp" />
+
+        <!-- Section des dernières sorties -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="Dernières sorties"
+            android:textColor="#E91E63"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/latestUpdatesRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp" />
+
+        <!-- Section des mangas récemment consultés -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="Récemment consultés"
+            android:textColor="#E91E63"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recentMangaRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:orientation="horizontal"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp" />
+            
+        <!-- Indicateur de chargement -->
+        <ProgressBar
+            android:id="@+id/homeProgressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="16dp"
+            android:indeterminateTint="#E91E63"
+            android:visibility="gone" />
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

@@ -1,120 +1,113 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:background="#121212"
+    tools:context=".MainActivity">
 
-    <!-- Section des dernières lectures -->
-    <LinearLayout
-        android:id="@+id/recentMangaSection"
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="8dp">
-        
-        <TextView
+        android:background="#1F1F1F">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:title="SushiScan"
+            app:titleTextColor="#E91E63" />
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Dernières lectures"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:padding="8dp"/>
-            
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recentMangaRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingBottom="8dp"/>
-    </LinearLayout>
+            app:tabMode="fixed"
+            app:tabGravity="fill"
+            app:tabTextColor="#AAAAAA"
+            app:tabSelectedTextColor="#E91E63"
+            app:tabIndicatorColor="#E91E63"
+            app:tabBackground="#1F1F1F" />
 
-    <LinearLayout
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPager"
         android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/searchFab"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        android:translationY="10dp">
+        android:layout_margin="16dp"
+        android:contentDescription="Recherche"
+        android:src="@android:drawable/ic_menu_search"
+        app:backgroundTint="#E91E63"
+        app:layout_anchor="@id/viewPager"
+        app:layout_anchorGravity="bottom|end"
+        app:tint="#FFFFFF" />
 
-        <EditText
-            android:id="@+id/searchEditText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:hint="Entrez le nom d'un anime"
-            android:imeOptions="actionSearch"
-            android:inputType="text"
-            android:minHeight="48dp" />
-
-        <Button
-            android:id="@+id/searchButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Rechercher" />
-    </LinearLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/animeRecyclerView"
+    <FrameLayout
+        android:id="@+id/searchOverlay"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp" />
-
-    <ScrollView
-        android:id="@+id/detailScrollView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:background="#CC121212"
+        android:clickable="true"
+        android:focusable="true"
         android:visibility="gone">
 
-        <LinearLayout
-            android:id="@+id/detailsContainer"
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:layout_margin="16dp"
+            app:cardBackgroundColor="#1F1F1F"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="4dp">
 
-            <ImageView
-                android:id="@+id/mangaImage"
-                android:layout_width="match_parent"
-                android:layout_height="200dp"
-                android:adjustViewBounds="true"
-                android:scaleType="centerCrop"
-                android:contentDescription="Anime Cover Image" />
-
-            <TextView
-                android:id="@+id/animeTitleTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/animeDetailsTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp" />
-                
-            <!-- Section pour les scans disponibles -->
             <LinearLayout
-                android:id="@+id/scansContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="16dp"
-                android:visibility="gone">
-                
-                <TextView
+                android:orientation="vertical">
+
+                <androidx.appcompat.widget.SearchView
+                    android:id="@+id/searchView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Scans disponibles"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="8dp"/>
-                    
-                <!-- Les boutons pour accéder aux scans seront ajoutés ici dynamiquement -->
+                    app:iconifiedByDefault="false"
+                    app:queryBackground="@android:color/transparent"
+                    app:queryHint="Rechercher des mangas..." />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/searchResultsRecyclerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:maxHeight="400dp"
+                    android:visibility="gone" />
+
+                <ProgressBar
+                    android:id="@+id/searchProgressBar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_margin="8dp"
+                    android:indeterminateTint="#E91E63"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/noResultsTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:padding="16dp"
+                    android:text="Aucun résultat trouvé"
+                    android:textColor="#FFFFFF"
+                    android:visibility="gone" />
             </LinearLayout>
-        </LinearLayout>
-    </ScrollView>
-</LinearLayout>
+        </androidx.cardview.widget.CardView>
+    </FrameLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
