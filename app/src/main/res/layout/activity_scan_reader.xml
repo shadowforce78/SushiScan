@@ -43,16 +43,24 @@
                 android:maxLines="1"
                 android:ellipsize="end" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/chapterButton"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            <Spinner
+                android:id="@+id/chapterSpinner"
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
-                android:text="Chapitre 1"
-                android:textColor="#FFFFFF"
-                android:textSize="12sp"
-                app:strokeColor="#FFFFFF"
-                app:cornerRadius="20dp" />
+                android:minWidth="120dp"
+                android:popupBackground="#303030"
+                android:backgroundTint="#FFFFFF" />
+
+            <ImageButton
+                android:id="@+id/downloadButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="8dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="8dp"
+                android:src="@android:drawable/ic_menu_save"
+                android:tint="#FFFFFF"
+                android:contentDescription="Télécharger le chapitre" />
         </LinearLayout>
     </androidx.appcompat.widget.Toolbar>
 
@@ -61,8 +69,8 @@
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <androidx.viewpager2.widget.ViewPager2
-            android:id="@+id/scanViewPager"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/scanRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="#000000" />
@@ -119,6 +127,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center" />
+
+        <ProgressBar
+            android:id="@+id/downloadProgressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="60dp"
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/errorTextView"

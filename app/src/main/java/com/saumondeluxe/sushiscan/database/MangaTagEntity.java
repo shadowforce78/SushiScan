@@ -3,6 +3,7 @@ package com.saumondeluxe.sushiscan.database;
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
+import androidx.room.Ignore;
 
 /**
  * Entité pour représenter un tag/genre de manga
@@ -26,6 +27,7 @@ public class MangaTagEntity {
         // Constructeur vide requis par Room
     }
 
+    @Ignore
     public MangaTagEntity(@NonNull String name, int tagType) {
         this.name = name;
         this.tagType = tagType;

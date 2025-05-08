@@ -7,80 +7,54 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Utilitaire pour charger des images depuis Google Drive ou d'autres sources
+ */
 public class DriveImageLoader {
     private static final String TAG = "DriveImageLoader";
 
     /**
-     * Crée une GlideUrl spécialement formatée pour les liens Google Drive
-     * avec des en-têtes qui simulent un navigateur pour éviter les blocages
+     * Crée une URL compatible avec Glide pour Google Drive et d'autres sources
+     * @param url URL de l'image
+     * @return GlideUrl configurée avec les en-têtes appropriés
      */
-    public static GlideUrl getGlideUrl(String driveUrl) {
-        try {
-            // Ajouter des en-têtes de navigateur pour tromper la protection Google Drive
-            return new GlideUrl(driveUrl, new Headers() {
-                @Override
-                public Map<String, String> getHeaders() {
-                    Map<String, String> headers = new HashMap<>();
-                    headers.put("User-Agent",
-                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36");
-                    headers.put("Accept",
-                            "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8");
-                    headers.put("Accept-Language", "fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7");
-                    headers.put("Sec-Fetch-Dest", "document");
-                    headers.put("Sec-Fetch-Mode", "navigate");
-                    headers.put("Sec-Fetch-Site", "none");
-                    headers.put("Sec-Fetch-User", "?1");
-                    return headers;
-                }
-            });
-        } catch (Exception e) {
-            Log.e(TAG, "Erreur lors de la création de GlideUrl: " + e.getMessage());
-            return new GlideUrl(driveUrl);
-        }
+    public static GlideUrl getGlideUrl(String url) {
+        // Ajouter des en-têtes personnalisés pour éviter les problèmes de cache et de redirection
+        return new GlideUrl(url, new Headers() {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36");
+                return headers;
+            }
+        });
     }
 
     /**
-     * Convertit les URLs Google Drive en URLs haute qualité qui fonctionnent mieux
-     * avec les applications mobiles.
+     * Génère une URL alternative pour les cas où l'URL principale ne fonctionne pas
+     * @param url URL originale
+     * @return URL alternative
      */
-    public static String getAlternativeUrl(String driveUrl) {
-        try {
-            if (driveUrl.contains("drive.google.com") && driveUrl.contains("id=")) {
-                // Extraire l'ID du fichier
-                String fileId = driveUrl.substring(driveUrl.indexOf("id=") + 3);
-                if (fileId.contains("&")) {
-                    fileId = fileId.substring(0, fileId.indexOf("&"));
-                }
-
-                // URL alternative utilisant une résolution plus élevée
-                // sz=w0 signifie pas de redimensionnement, obtenir la taille originale
-                return "https://drive.google.com/uc?export=download&id=" + fileId;
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Erreur lors de la conversion d'URL: " + e.getMessage());
+    public static String getAlternativeUrl(String url) {
+        // Pour les URLs de Google Drive, essayer un format alternatif
+        if (url.contains("drive.google.com")) {
+            // Remplacer le format de visualisation par un format de téléchargement
+            return url.replace("view?usp=sharing", "preview");
         }
-        return driveUrl;
+        return url;
     }
 
     /**
-     * Troisième méthode pour obtenir une image en pleine qualité si les deux
-     * premières échouent
+     * Génère une URL de haute qualité si possible
+     * @param url URL originale
+     * @return URL en haute qualité
      */
-    public static String getHighQualityUrl(String driveUrl) {
-        try {
-            if (driveUrl.contains("drive.google.com") && driveUrl.contains("id=")) {
-                // Extraire l'ID du fichier
-                String fileId = driveUrl.substring(driveUrl.indexOf("id=") + 3);
-                if (fileId.contains("&")) {
-                    fileId = fileId.substring(0, fileId.indexOf("&"));
-                }
-
-                // URL haute qualité - parfois plus lente mais meilleure qualité
-                return "https://drive.google.com/thumbnail?id=" + fileId + "&sz=w2000-h2000";
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Erreur lors de la création de l'URL haute qualité: " + e.getMessage());
+    public static String getHighQualityUrl(String url) {
+        // Tenter d'obtenir une version de l'image en haute qualité
+        if (url.contains("=w")) {
+            // Augmenter la largeur pour les images redimensionnées
+            return url.replaceAll("=w\\d+", "=w2000");
         }
-        return driveUrl;
+        return url;
     }
 }

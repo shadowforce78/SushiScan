@@ -61,6 +61,7 @@ public class MangaEntity implements Parcelable {
         this.genres = new ArrayList<>();
     }
 
+    @Ignore
     public MangaEntity(String name, String imageUrl, String scanTypeUrl) {
         this.name = name;
         this.imageUrl = imageUrl;
@@ -70,6 +71,7 @@ public class MangaEntity implements Parcelable {
         this.lastReadChapterNumber = 1;
     }
 
+    @Ignore
     protected MangaEntity(Parcel in) {
         name = in.readString();
         imageUrl = in.readString();

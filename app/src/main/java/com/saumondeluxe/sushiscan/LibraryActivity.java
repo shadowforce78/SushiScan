@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -44,26 +45,38 @@ public class LibraryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_library);
         
         // Initialiser les vues
-        downloadedRecyclerView = findViewById(R.id.downloadedRecyclerView);
-        recentlyReadRecyclerView = findViewById(R.id.recentlyReadRecyclerView);
-        emptyDownloadedTextView = findViewById(R.id.emptyDownloadedTextView);
-        emptyRecentlyReadTextView = findViewById(R.id.emptyRecentlyReadTextView);
-        loadingOverlay = findViewById(R.id.loadingOverlay);
-        refreshButton = findViewById(R.id.refreshButton);
-        ImageButton backButton = findViewById(R.id.backButton);
+        downloadedRecyclerView = findViewById(R.id.libraryRecyclerView);
+        recentlyReadRecyclerView = findViewById(R.id.mangaRecyclerView);
+        emptyDownloadedTextView = findViewById(R.id.emptyLibraryTextView);
+        emptyRecentlyReadTextView = findViewById(R.id.emptyTextView);
+        loadingOverlay = findViewById(R.id.loadingProgressBar);
+        refreshButton = findViewById(R.id.refreshFab);
+        ImageButton backButton = findViewById(R.id.libraryToolbar).findViewById(android.R.id.home);
+        
+        // Configurer la toolbar avec un bouton de retour
+        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.libraryToolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
         
         // Initialiser les gestionnaires de données
         downloadedMangaManager = new DownloadedMangaManager(this);
         recentMangaManager = new RecentMangaManager(this);
         
-        // Configurer le bouton de retour
-        backButton.setOnClickListener(v -> finish());
+        // Configurer les RecyclerViews
+        setupRecyclerViews();
         
         // Configurer le bouton d'actualisation
         refreshButton.setOnClickListener(v -> refreshLibrary());
         
-        // Configurer les RecyclerViews
-        setupRecyclerViews();
+        // Configurer le SwipeRefreshLayout si présent
+        SwipeRefreshLayout swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
+        if (swipeRefreshLayout != null) {
+            swipeRefreshLayout.setOnRefreshListener(() -> {
+                refreshLibrary();
+                swipeRefreshLayout.setRefreshing(false);
+            });
+        }
         
         // Charger les données
         loadLibraryData();

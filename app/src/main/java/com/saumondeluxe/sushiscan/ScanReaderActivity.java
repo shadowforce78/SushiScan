@@ -450,7 +450,7 @@ public class ScanReaderActivity extends AppCompatActivity implements SequentialI
     private void loadChaptersFromDatabase() {
         dbExecutor.execute(() -> {
             // Vérifier s'il y a des chapitres téléchargés pour ce manga
-            List<ChapterEntity> dbChapters = chapterDao.getChaptersByManga(nameForInfo, scanType).getValue();
+            List<ChapterEntity> dbChapters = chapterDao.getChaptersByMangaSync(nameForInfo, scanType);
 
             if (dbChapters != null && !dbChapters.isEmpty()) {
                 // Convertir les entités de base de données en objets Chapter

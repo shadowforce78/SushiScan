@@ -1,132 +1,59 @@
 package com.saumondeluxe.sushiscan.database;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.util.Log;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
+/**
+ * Gestionnaire pour les mangas favoris
+ */
 public class FavoriteMangaManager {
-    private static final String TAG = "FavoriteMangaManager";
-    private static final String PREFS_NAME = "favorite_mangas_prefs";
-    private static final String KEY_FAVORITE_MANGAS = "favorite_mangas";
-    
-    private final Context context;
-    private final SharedPreferences sharedPreferences;
-    private final Gson gson;
-    
+    private final SushiScanDatabase database;
+    private final MangaDao mangaDao;
+    private final Executor executor;
+
     public FavoriteMangaManager(Context context) {
-        this.context = context;
-        this.sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        this.gson = new Gson();
+        this.database = SushiScanDatabase.getInstance(context);
+        this.mangaDao = database.mangaDao();
+        this.executor = Executors.newSingleThreadExecutor();
     }
-    
-    /**
-     * Ajoute un manga aux favoris
-     */
-    public void addFavoriteManga(MangaEntity manga) {
-        List<MangaEntity> favoriteMangas = getFavoriteMangas();
-        
-        // Vérifie si le manga existe déjà dans la liste
-        boolean exists = false;
-        for (int i = 0; i < favoriteMangas.size(); i++) {
-            if (favoriteMangas.get(i).getName().equals(manga.getName())) {
-                // Mise à jour du manga existant
-                MangaEntity existingManga = favoriteMangas.get(i);
-                existingManga.setImageUrl(manga.getImageUrl());
-                existingManga.setGenres(manga.getGenres());
-                existingManga.setDescription(manga.getDescription());
-                existingManga.setFavorite(true);
-                favoriteMangas.set(i, existingManga);
-                exists = true;
-                break;
-            }
-        }
-        
-        // Ajoute le manga s'il n'existe pas encore
-        if (!exists) {
-            manga.setFavorite(true);
-            favoriteMangas.add(manga);
-        }
-        
-        saveFavoriteMangas(favoriteMangas);
-        Log.d(TAG, "Manga favori ajouté: " + manga.getName());
-    }
-    
-    /**
-     * Retire un manga des favoris
-     */
-    public void removeFavoriteManga(String mangaName) {
-        List<MangaEntity> favoriteMangas = getFavoriteMangas();
-        
-        for (int i = 0; i < favoriteMangas.size(); i++) {
-            if (favoriteMangas.get(i).getName().equals(mangaName)) {
-                favoriteMangas.get(i).setFavorite(false);
-                favoriteMangas.remove(i);
-                break;
-            }
-        }
-        
-        saveFavoriteMangas(favoriteMangas);
-        Log.d(TAG, "Manga favori supprimé: " + mangaName);
-    }
-    
+
     /**
      * Récupère la liste des mangas favoris
      */
     public List<MangaEntity> getFavoriteMangas() {
-        String json = sharedPreferences.getString(KEY_FAVORITE_MANGAS, "");
-        
-        if (json.isEmpty()) {
-            return new ArrayList<>();
-        }
-        
-        Type type = new TypeToken<List<MangaEntity>>(){}.getType();
-        List<MangaEntity> mangas = gson.fromJson(json, type);
-        
-        return mangas != null ? mangas : new ArrayList<>();
+        List<MangaEntity> favorites = mangaDao.getFavoriteMangasSync();
+        return favorites != null ? favorites : new ArrayList<>();
     }
-    
+
     /**
-     * Vérifie si un manga est en favori
+     * Ajoute ou retire un manga des favoris
      */
-    public boolean isMangaFavorite(String mangaName) {
-        List<MangaEntity> favoriteMangas = getFavoriteMangas();
-        
-        for (MangaEntity manga : favoriteMangas) {
-            if (manga.getName().equals(mangaName)) {
-                return true;
+    public void toggleFavorite(MangaEntity manga, Runnable onComplete) {
+        if (manga == null) return;
+
+        executor.execute(() -> {
+            // Inverser l'état des favoris
+            manga.setFavorite(!manga.isFavorite());
+            
+            // Mettre à jour dans la base de données
+            mangaDao.updateManga(manga);
+            
+            // Exécuter le callback si fourni
+            if (onComplete != null) {
+                onComplete.run();
             }
-        }
-        
-        return false;
+        });
     }
     
     /**
-     * Bascule l'état favori d'un manga (ajoute ou supprime)
-     * 
-     * @return le nouvel état (true = favori, false = non favori)
+     * Vérifie si un manga est dans les favoris
      */
-    public boolean toggleFavorite(MangaEntity manga) {
-        if (isMangaFavorite(manga.getName())) {
-            removeFavoriteManga(manga.getName());
-            return false;
-        } else {
-            addFavoriteManga(manga);
-            return true;
-        }
-    }
-    
-    /**
-     * Enregistre la liste des mangas favoris
-     */
-    private void saveFavoriteMangas(List<MangaEntity> favoriteMangas) {
-        String json = gson.toJson(favoriteMangas);
-        sharedPreferences.edit().putString(KEY_FAVORITE_MANGAS, json).apply();
+    public boolean isFavorite(String mangaName) {
+        MangaEntity manga = mangaDao.getMangaByName(mangaName);
+        return manga != null && manga.isFavorite();
     }
 }

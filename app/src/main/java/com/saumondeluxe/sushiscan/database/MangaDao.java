@@ -36,6 +36,9 @@ public interface MangaDao {
 
     @Query("SELECT * FROM mangas ORDER BY lastReadTime DESC LIMIT :limit")
     LiveData<List<MangaEntity>> getRecentlyReadManga(int limit);
+    
+    @Query("SELECT * FROM mangas ORDER BY lastReadTime DESC LIMIT :limit")
+    List<MangaEntity> getRecentlyReadMangasSync(int limit);
 
     @Query("SELECT * FROM mangas ORDER BY lastReadTime DESC")
     LiveData<List<MangaEntity>> getRecentlyReadManga();
@@ -54,4 +57,24 @@ public interface MangaDao {
 
     @Query("SELECT COUNT(*) FROM mangas WHERE name = :name")
     int mangaExists(String name);
+    
+    // Méthodes ajoutées pour les fonctionnalités de favoris et de bibliothèque
+    
+    @Query("SELECT * FROM mangas WHERE isFavorite = 1")
+    LiveData<List<MangaEntity>> getFavoriteMangas();
+    
+    @Query("SELECT * FROM mangas WHERE isFavorite = 1")
+    List<MangaEntity> getFavoriteMangasSync();
+    
+    @Query("SELECT * FROM mangas WHERE isDownloaded = 1")
+    LiveData<List<MangaEntity>> getDownloadedMangas();
+    
+    @Query("SELECT * FROM mangas WHERE isDownloaded = 1")
+    List<MangaEntity> getDownloadedMangasSync();
+    
+    @Query("UPDATE mangas SET isFavorite = :isFavorite WHERE id = :mangaId")
+    void updateFavoriteStatus(long mangaId, boolean isFavorite);
+    
+    @Query("UPDATE mangas SET isDownloaded = :isDownloaded WHERE id = :mangaId")
+    void updateDownloadStatus(long mangaId, boolean isDownloaded);
 }

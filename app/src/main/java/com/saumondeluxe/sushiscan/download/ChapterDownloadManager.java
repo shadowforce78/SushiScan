@@ -2,6 +2,7 @@ package com.saumondeluxe.sushiscan.download;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -22,11 +23,16 @@ import com.saumondeluxe.sushiscan.database.SushiScanDatabase;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 /**
  * Classe responsable du téléchargement et du stockage local des chapitres
@@ -34,6 +40,7 @@ import java.util.concurrent.Executors;
 public class ChapterDownloadManager {
     private static final String TAG = "ChapterDownloadManager";
     private static final int MAX_CONCURRENT_DOWNLOADS = 2;
+    private static ChapterDownloadManager instance;
 
     private static volatile ChapterDownloadManager INSTANCE;
 
@@ -43,6 +50,7 @@ public class ChapterDownloadManager {
     private final PageImageDao pageImageDao;
     private final ExecutorService executor;
     private final Handler mainHandler;
+    private final OkHttpClient client;
 
     // Interface d'écouteur pour les progrès de téléchargement
     public interface DownloadProgressListener {
@@ -58,6 +66,10 @@ public class ChapterDownloadManager {
         this.pageImageDao = database.pageImageDao();
         this.executor = Executors.newFixedThreadPool(MAX_CONCURRENT_DOWNLOADS);
         this.mainHandler = new Handler(Looper.getMainLooper());
+        this.client = new OkHttpClient.Builder()
+                .followRedirects(true)
+                .followSslRedirects(true)
+                .build();
     }
 
     public static ChapterDownloadManager getInstance(Context context) {
@@ -349,5 +361,38 @@ public class ChapterDownloadManager {
             return "unknown";
         }
         return input.replaceAll("[^a-zA-Z0-9.-]", "_").toLowerCase();
+    }
+
+    /**
+     * Télécharge une seule image
+     */
+    private void downloadImage(String imageUrl, String localPath) throws IOException {
+        Request request = new Request.Builder()
+                .url(imageUrl)
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                throw new IOException("Réponse du serveur incorrecte: " + response.code());
+            }
+
+            // Enregistrer l'image sur le disque
+            try (InputStream inputStream = response.body().byteStream();
+                 FileOutputStream outputStream = new FileOutputStream(localPath)) {
+                byte[] buffer = new byte[4096];
+                int bytesRead;
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, bytesRead);
+                }
+                outputStream.flush();
+            }
+        }
+    }
+
+    /**
+     * Nettoie un nom de fichier pour qu'il soit valide sur le système de fichiers
+     */
+    private String sanitizeFilename(String filename) {
+        return filename.replaceAll("[\\\\/:*?\"<>|]", "_").trim();
     }
 }

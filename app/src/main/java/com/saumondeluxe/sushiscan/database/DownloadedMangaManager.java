@@ -1,180 +1,146 @@
 package com.saumondeluxe.sushiscan.database;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
 import java.io.File;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
+/**
+ * Gestionnaire pour les mangas téléchargés
+ */
 public class DownloadedMangaManager {
     private static final String TAG = "DownloadedMangaManager";
-    private static final String PREFS_NAME = "downloaded_mangas_prefs";
-    private static final String KEY_DOWNLOADED_MANGAS = "downloaded_mangas";
     
     private final Context context;
-    private final SharedPreferences sharedPreferences;
-    private final Gson gson;
-    
+    private final SushiScanDatabase database;
+    private final MangaDao mangaDao;
+    private final ChapterDao chapterDao;
+    private final Executor executor;
+
     public DownloadedMangaManager(Context context) {
-        this.context = context;
-        this.sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        this.gson = new Gson();
+        this.context = context.getApplicationContext();
+        this.database = SushiScanDatabase.getInstance(context);
+        this.mangaDao = database.mangaDao();
+        this.chapterDao = database.chapterDao();
+        this.executor = Executors.newSingleThreadExecutor();
     }
-    
-    /**
-     * Ajoute un manga à la liste des téléchargements
-     */
-    public void addDownloadedManga(MangaEntity manga) {
-        List<MangaEntity> downloadedMangas = getDownloadedMangas();
-        
-        // Vérifie si le manga existe déjà dans la liste
-        boolean exists = false;
-        for (int i = 0; i < downloadedMangas.size(); i++) {
-            if (downloadedMangas.get(i).getName().equals(manga.getName())) {
-                // Mise à jour du manga existant
-                MangaEntity existingManga = downloadedMangas.get(i);
-                existingManga.setImageUrl(manga.getImageUrl());
-                existingManga.setScanTypeUrl(manga.getScanTypeUrl());
-                existingManga.setDownloaded(true);
-                existingManga.setLastReadTimestamp(System.currentTimeMillis());
-                downloadedMangas.set(i, existingManga);
-                exists = true;
-                break;
-            }
-        }
-        
-        // Ajoute le manga s'il n'existe pas encore
-        if (!exists) {
-            manga.setDownloaded(true);
-            manga.setLastReadTimestamp(System.currentTimeMillis());
-            downloadedMangas.add(manga);
-        }
-        
-        saveDownloadedMangas(downloadedMangas);
-        Log.d(TAG, "Manga téléchargé ajouté: " + manga.getName());
-    }
-    
-    /**
-     * Retire un manga de la liste des téléchargements
-     */
-    public void removeDownloadedManga(String mangaName) {
-        List<MangaEntity> downloadedMangas = getDownloadedMangas();
-        
-        for (int i = 0; i < downloadedMangas.size(); i++) {
-            if (downloadedMangas.get(i).getName().equals(mangaName)) {
-                downloadedMangas.get(i).setDownloaded(false);
-                downloadedMangas.remove(i);
-                break;
-            }
-        }
-        
-        saveDownloadedMangas(downloadedMangas);
-        Log.d(TAG, "Manga téléchargé supprimé: " + mangaName);
-        
-        // Supprimer également les fichiers téléchargés
-        deleteDownloadedFiles(mangaName);
-    }
-    
+
     /**
      * Récupère la liste des mangas téléchargés
      */
     public List<MangaEntity> getDownloadedMangas() {
-        String json = sharedPreferences.getString(KEY_DOWNLOADED_MANGAS, "");
-        
-        if (json.isEmpty()) {
-            return new ArrayList<>();
-        }
-        
-        Type type = new TypeToken<List<MangaEntity>>(){}.getType();
-        List<MangaEntity> mangas = gson.fromJson(json, type);
-        
-        return mangas != null ? mangas : new ArrayList<>();
+        // Chercher les mangas qui ont au moins un chapitre téléchargé
+        List<MangaEntity> downloadedMangas = mangaDao.getDownloadedMangasSync();
+        return downloadedMangas != null ? downloadedMangas : new ArrayList<>();
     }
-    
+
     /**
-     * Vérifie si un manga est téléchargé
-     */
-    public boolean isMangaDownloaded(String mangaName) {
-        List<MangaEntity> downloadedMangas = getDownloadedMangas();
-        
-        for (MangaEntity manga : downloadedMangas) {
-            if (manga.getName().equals(mangaName)) {
-                return true;
-            }
-        }
-        
-        return false;
-    }
-    
-    /**
-     * Enregistre la liste des mangas téléchargés
-     */
-    private void saveDownloadedMangas(List<MangaEntity> downloadedMangas) {
-        String json = gson.toJson(downloadedMangas);
-        sharedPreferences.edit().putString(KEY_DOWNLOADED_MANGAS, json).apply();
-    }
-    
-    /**
-     * Supprime les fichiers téléchargés d'un manga
-     */
-    private void deleteDownloadedFiles(String mangaName) {
-        // Créer un répertoire sécurisé pour le manga
-        String safeMangaName = mangaName.replaceAll("[^a-zA-Z0-9]", "_");
-        File mangaDir = new File(context.getExternalFilesDir(null), "downloads/" + safeMangaName);
-        
-        if (mangaDir.exists() && mangaDir.isDirectory()) {
-            deleteRecursive(mangaDir);
-            Log.d(TAG, "Fichiers téléchargés supprimés pour: " + mangaName);
-        }
-    }
-    
-    /**
-     * Supprime récursivement un répertoire et son contenu
-     */
-    private void deleteRecursive(File fileOrDirectory) {
-        if (fileOrDirectory.isDirectory()) {
-            for (File child : fileOrDirectory.listFiles()) {
-                deleteRecursive(child);
-            }
-        }
-        fileOrDirectory.delete();
-    }
-    
-    /**
-     * Vérifie et met à jour la liste des mangas téléchargés en fonction des fichiers présents
+     * Rescan les mangas téléchargés pour mettre à jour la base de données
      */
     public void rescanDownloadedMangas() {
-        File downloadsDir = new File(context.getExternalFilesDir(null), "downloads");
-        
-        if (!downloadsDir.exists() || !downloadsDir.isDirectory()) {
-            return;
-        }
-        
-        List<MangaEntity> downloadedMangas = getDownloadedMangas();
-        List<MangaEntity> updatedList = new ArrayList<>();
-        
-        // Vérifier que chaque manga dans la liste a toujours ses fichiers
-        for (MangaEntity manga : downloadedMangas) {
-            String safeMangaName = manga.getName().replaceAll("[^a-zA-Z0-9]", "_");
-            File mangaDir = new File(downloadsDir, safeMangaName);
+        executor.execute(() -> {
+            // Répertoire principal où sont stockés les chapitres téléchargés
+            File chaptersDir = new File(context.getFilesDir(), "chapters");
             
-            if (mangaDir.exists() && mangaDir.isDirectory() && mangaDir.listFiles().length > 0) {
-                updatedList.add(manga);
-            } else {
-                Log.d(TAG, "Manga sans fichiers supprimé: " + manga.getName());
+            if (!chaptersDir.exists()) {
+                return;
             }
+            
+            // Parcourir les dossiers de manga
+            File[] mangaDirs = chaptersDir.listFiles();
+            if (mangaDirs != null) {
+                for (File mangaDir : mangaDirs) {
+                    if (mangaDir.isDirectory()) {
+                        String mangaName = desanitizeFileName(mangaDir.getName());
+                        
+                        // Vérifier si ce manga existe déjà dans la base de données
+                        MangaEntity manga = mangaDao.getMangaByName(mangaName);
+                        
+                        // Si le manga n'existe pas, le créer
+                        if (manga == null) {
+                            manga = new MangaEntity();
+                            manga.setName(mangaName);
+                            manga.setDownloaded(true);
+                            long mangaId = mangaDao.insertManga(manga);
+                            manga.setId(mangaId);
+                        } else {
+                            manga.setDownloaded(true);
+                            mangaDao.updateManga(manga);
+                        }
+                        
+                        // Parcourir les dossiers de chapitres de ce manga
+                        File[] chapterDirs = mangaDir.listFiles();
+                        if (chapterDirs != null) {
+                            for (File chapterDir : chapterDirs) {
+                                if (chapterDir.isDirectory() && chapterDir.getName().startsWith("chapter_")) {
+                                    // Extraire le numéro du chapitre
+                                    String chapterNumberStr = chapterDir.getName().substring("chapter_".length());
+                                    try {
+                                        int chapterNumber = Integer.parseInt(chapterNumberStr);
+                                        
+                                        // Vérifier si ce chapitre existe déjà dans la base de données
+                                        ChapterEntity chapter = chapterDao.getChapterByNumber(mangaName, "", chapterNumber);
+                                        
+                                        // Si le chapitre n'existe pas, le créer
+                                        if (chapter == null) {
+                                            chapter = new ChapterEntity();
+                                            chapter.setName("Chapitre " + chapterNumber);
+                                            chapter.setNumber(chapterNumber);
+                                            chapter.setMangaName(mangaName);
+                                            chapter.setScanType("");
+                                            chapter.setDownloaded(true);
+                                            long chapterId = chapterDao.insertChapter(chapter);
+                                            chapter.setId(chapterId);
+                                        } else {
+                                            chapter.setDownloaded(true);
+                                            chapterDao.updateChapter(chapter);
+                                        }
+                                    } catch (NumberFormatException e) {
+                                        Log.e(TAG, "Format de numéro de chapitre invalide : " + chapterNumberStr);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    /**
+     * Convertit un nom de fichier sanitisé en nom lisible
+     */
+    private String desanitizeFileName(String sanitizedName) {
+        // Cette fonction est une approximation, car on ne peut pas récupérer parfaitement le nom original
+        // Remplacer les underscores par des espaces et faire une belle mise en forme
+        String readable = sanitizedName.replace('_', ' ');
+        return toTitleCase(readable);
+    }
+    
+    /**
+     * Convertit une chaîne en Title Case (première lettre de chaque mot en majuscule)
+     */
+    private String toTitleCase(String input) {
+        StringBuilder titleCase = new StringBuilder(input.length());
+        boolean nextTitleCase = true;
+        
+        for (char c : input.toCharArray()) {
+            if (Character.isSpaceChar(c)) {
+                nextTitleCase = true;
+            } else if (nextTitleCase) {
+                c = Character.toTitleCase(c);
+                nextTitleCase = false;
+            } else {
+                c = Character.toLowerCase(c);
+            }
+            
+            titleCase.append(c);
         }
         
-        // Mettre à jour la liste si des changements ont été détectés
-        if (updatedList.size() != downloadedMangas.size()) {
-            saveDownloadedMangas(updatedList);
-            Log.d(TAG, "Liste des mangas téléchargés mise à jour après analyse.");
-        }
+        return titleCase.toString();
     }
 }

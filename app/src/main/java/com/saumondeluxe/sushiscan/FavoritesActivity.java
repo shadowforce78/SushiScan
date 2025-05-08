@@ -123,7 +123,11 @@ public class FavoritesActivity extends AppCompatActivity {
             holder.titleTextView.setText(manga.getName());
             
             // Définir l'info additionnelle
-            holder.infoTextView.setText(manga.getGenres());
+            if (manga.getGenres() != null && !manga.getGenres().isEmpty()) {
+                holder.infoTextView.setText(String.join(", ", manga.getGenres()));
+            } else {
+                holder.infoTextView.setText("");
+            }
             
             // Charger l'image de couverture
             if (manga.getImageUrl() != null && !manga.getImageUrl().isEmpty()) {

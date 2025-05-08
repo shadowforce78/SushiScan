@@ -29,7 +29,7 @@
             app:tabTextColor="#AAAAAA"
             app:tabSelectedTextColor="#E91E63"
             app:tabIndicatorColor="#E91E63"
-            app:tabBackground="#1F1F1F" />
+            app:tabBackground="@drawable/tab_background" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -38,7 +38,50 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+    
+    <!-- Navigation buttons at bottom -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:background="#1F1F1F"
+        android:gravity="center"
+        android:layout_gravity="bottom">
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/searchButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Recherche"
+            android:textColor="#FFFFFF"
+            app:backgroundTint="#E91E63"
+            android:layout_marginEnd="8dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/libraryButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Bibliothèque"
+            android:textColor="#FFFFFF"
+            app:backgroundTint="#E91E63"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/myListButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Ma Liste"
+            android:textColor="#FFFFFF"
+            app:backgroundTint="#E91E63"
+            android:layout_marginStart="8dp" />
+    </LinearLayout>
+
+    <!-- Original search FAB - you may choose to keep or remove this -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/searchFab"
         android:layout_width="wrap_content"
@@ -49,7 +92,8 @@
         app:backgroundTint="#E91E63"
         app:layout_anchor="@id/viewPager"
         app:layout_anchorGravity="bottom|end"
-        app:tint="#FFFFFF" />
+        app:tint="#FFFFFF"
+        android:visibility="gone" />
 
     <FrameLayout
         android:id="@+id/searchOverlay"

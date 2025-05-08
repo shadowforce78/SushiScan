@@ -35,9 +35,15 @@ public interface ChapterDao {
 
     @Query("SELECT * FROM chapters WHERE mangaName = :mangaName AND scanType = :scanType ORDER BY number DESC")
     LiveData<List<ChapterEntity>> getChaptersByManga(String mangaName, String scanType);
+    
+    @Query("SELECT * FROM chapters WHERE mangaName = :mangaName AND scanType = :scanType ORDER BY number DESC")
+    List<ChapterEntity> getChaptersByMangaSync(String mangaName, String scanType);
 
     @Query("SELECT * FROM chapters WHERE isDownloaded = 1 ORDER BY lastReadTime DESC LIMIT 20")
     LiveData<List<ChapterEntity>> getRecentDownloadedChapters();
+    
+    @Query("SELECT * FROM chapters WHERE isDownloaded = 1 ORDER BY lastReadTime DESC LIMIT 20")
+    List<ChapterEntity> getRecentDownloadedChaptersSync();
 
     @Query("DELETE FROM chapters WHERE id = :chapterId")
     void deleteChapter(long chapterId);

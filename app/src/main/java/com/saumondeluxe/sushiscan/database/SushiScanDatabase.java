@@ -22,7 +22,7 @@ import java.util.concurrent.Executors;
         UserPreferencesEntity.class,
         MangaTagEntity.class,
         MangaTagJoinEntity.class }, version = 1, exportSchema = false)
-@TypeConverters({ DateConverter.class })
+@TypeConverters({ DateConverter.class, Converters.class })
 public abstract class SushiScanDatabase extends RoomDatabase {
 
     // DAOs
