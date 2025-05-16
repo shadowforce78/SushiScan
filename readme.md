@@ -116,6 +116,7 @@ Développé avec ❤️ par **Adam Planque**<br>
 ## 📃 Licence
 
 Ce projet est open-source sous [MIT License](./LICENSE).
+(Pas encore mais faite comme si)
 
 ---
 
