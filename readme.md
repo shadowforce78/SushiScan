@@ -24,9 +24,9 @@ Screenshots : `home`, `search`, `detail`, `reader`, `library`, `list`
 
 ## 🔧 Technologies utilisées
 
-- **🖥️ UI** : [Avalonia UI](https://avaloniaui.net/) — MVVM, XAML
-- **🧠 Backend API** : Node.js ou FastAPI (à choisir)
-- **📦 Stockage local** : JSON / LiteDB
+- **🖥️ UI** : [Avalonia UI](https://avaloniaui.net/) — MVVM, AXAML
+- **🧠 Backend API** : FastAPI
+- **📦 Stockage local** : JSON
 - **🔌 HTTP Client** : `HttpClient` asynchrone (avec cache et fallback)
 
 ---
