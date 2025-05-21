@@ -3,6 +3,7 @@
   <component name="AvaloniaProject">
     <option name="projectPerEditor">
       <map>
+        <entry key="SushiScan/Views/HomeView.axaml" value="SushiScan.Browser/SushiScan.Browser.csproj" />
         <entry key="SushiScan/Views/MainView.axaml" value="SushiScan.Desktop/SushiScan.Desktop.csproj" />
       </map>
     </option>

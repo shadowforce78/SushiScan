@@ -4,5 +4,11 @@ namespace SushiScan.ViewModels;
 
 public partial class MainViewModel : ViewModelBase
 {
-    [ObservableProperty] private string _greeting = "Welcome to Avalonia!";
+    public HomeViewModel HomeViewModel { get; }
+    
+    public MainViewModel()
+    {
+        HomeViewModel = new HomeViewModel();
+    }
 }
+

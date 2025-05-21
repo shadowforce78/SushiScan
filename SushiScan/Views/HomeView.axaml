@@ -1,0 +1,119 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:SushiScan.ViewModels"
+             xmlns:models="clr-namespace:SushiScan.Models"
+             mc:Ignorable="d" d:DesignWidth="720" d:DesignHeight="1280"
+             x:Class="SushiScan.Views.HomeView"
+             x:DataType="vm:HomeViewModel"
+             Background="#121212">
+
+  <Design.DataContext>
+    <vm:HomeViewModel />
+  </Design.DataContext>
+
+  <UserControl.Styles>
+    <Style Selector="TextBlock.title">
+      <Setter Property="FontFamily" Value="JetBrains Mono, Inter, Segoe UI"/>
+      <Setter Property="FontWeight" Value="Bold"/>
+      <Setter Property="FontSize" Value="32"/>
+      <Setter Property="Foreground" Value="#FFFFFF"/>
+      <Setter Property="Margin" Value="0,20,0,10"/>
+      <Setter Property="HorizontalAlignment" Value="Center"/>
+    </Style>
+    
+    <Style Selector="TextBlock.sectionTitle">
+      <Setter Property="FontFamily" Value="JetBrains Mono, Inter, Segoe UI"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="FontSize" Value="24"/>
+      <Setter Property="Foreground" Value="#FFFFFF"/>
+      <Setter Property="Margin" Value="10,20,0,10"/>
+    </Style>
+    
+    <Style Selector="Button.viewMore">
+      <Setter Property="Background" Value="#2D4263"/>
+      <Setter Property="Foreground" Value="White"/>
+      <Setter Property="FontFamily" Value="JetBrains Mono, Inter, Segoe UI"/>
+      <Setter Property="FontWeight" Value="Medium"/>
+      <Setter Property="Padding" Value="15,8"/>
+      <Setter Property="Margin" Value="0,15,0,20"/>
+      <Setter Property="HorizontalAlignment" Value="Center"/>
+      <Setter Property="CornerRadius" Value="4"/>
+    </Style>
+
+    <Style Selector="Button.viewMore:pointerover">
+      <Setter Property="Background" Value="#3D5273"/>
+    </Style>
+    
+    <Style Selector="Border.mangaCard">
+      <Setter Property="Background" Value="#1E1E1E"/>
+      <Setter Property="CornerRadius" Value="8"/>
+      <Setter Property="Margin" Value="8"/>
+      <Setter Property="Width" Value="160"/>
+      <Setter Property="BorderBrush" Value="#333333"/>
+      <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+  </UserControl.Styles>
+
+  <Grid RowDefinitions="Auto,*">
+    <!-- Header avec le titre -->
+    <TextBlock Grid.Row="0" 
+               Text="{Binding Title}" 
+               Classes="title"/>
+    
+    <!-- Contenu principal -->
+    <ScrollViewer Grid.Row="1" Padding="10,0">
+      <StackPanel>
+        <!-- Section des mangas populaires -->
+        <TextBlock Text="{Binding PopularMangasTitle}" 
+                   Classes="sectionTitle"/>
+        
+        <!-- Grille de mangas -->
+        <ItemsControl ItemsSource="{Binding PopularMangas}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <WrapPanel HorizontalAlignment="Center"/>
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="models:Manga">
+              <Border Classes="mangaCard">
+                <StackPanel Spacing="5" Margin="8">
+                  <!-- Image du manga -->
+                  <Border Height="200" CornerRadius="6" ClipToBounds="True">
+                    <Image Source="{Binding ImagePath}" Stretch="UniformToFill"/>
+                  </Border>
+                  
+                  <!-- Nom du manga -->
+                  <TextBlock Text="{Binding Name}"
+                             Foreground="White"
+                             FontWeight="SemiBold"
+                             FontFamily="JetBrains Mono, Inter, Segoe UI"
+                             TextWrapping="Wrap"
+                             Margin="0,5,0,0"/>
+                  
+                  <!-- Genre principal -->
+                  <Border Background="#2D4263" 
+                          CornerRadius="4" 
+                          Padding="6,3" 
+                          HorizontalAlignment="Left">
+                    <TextBlock Text="{Binding MainGenre}"
+                               Foreground="White"
+                               FontSize="11"
+                               FontFamily="JetBrains Mono, Inter, Segoe UI"/>
+                  </Border>
+                </StackPanel>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        
+        <!-- Bouton "Voir plus" -->
+        <Button Content="Voir plus"
+                Command="{Binding ViewMoreMangas}"
+                Classes="viewMore"/>
+      </StackPanel>
+    </ScrollViewer>
+  </Grid>
+</UserControl>

@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:SushiScan.ViewModels"
+             xmlns:views="clr-namespace:SushiScan.Views"
              mc:Ignorable="d" d:DesignWidth="720" d:DesignHeight="1280"
              x:Class="SushiScan.Views.MainView"
              x:DataType="vm:MainViewModel">
@@ -11,5 +12,6 @@
          to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
     <vm:MainViewModel />
   </Design.DataContext>
-  <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+  
+  <views:HomeView DataContext="{Binding HomeViewModel}"/>
 </UserControl>
