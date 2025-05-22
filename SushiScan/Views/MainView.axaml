@@ -52,5 +52,45 @@
                            DataContext="{Binding MangaDetailViewModel}"
                            Name="MangaDetailView"/>
     </Grid>
+    
+    <!-- Page du lecteur de chapitre - visible quand ShowChapterReader est true -->
+    <Grid IsVisible="{Binding ShowChapterReader}" RowDefinitions="Auto,*">
+      <!-- Barre de navigation avec bouton de retour pour le lecteur -->
+      <Border Grid.Row="0" 
+              Background="#1E1E1E" 
+              Padding="10,5" 
+              BorderBrush="#333333" 
+              BorderThickness="0,0,0,1">
+        <Grid ColumnDefinitions="Auto,*">
+          <Button Grid.Column="0" 
+                  Content="← Retour" 
+                  Command="{Binding NavigateToHome}" 
+                  Background="Transparent"
+                  Foreground="White"
+                  Padding="10,5"
+                  VerticalAlignment="Center"/>
+          
+          <TextBlock Grid.Column="1"
+                     Text="Lecture du chapitre" 
+                     Foreground="White" 
+                     FontSize="18" 
+                     FontWeight="SemiBold"
+                     VerticalAlignment="Center"
+                     HorizontalAlignment="Center"
+                     Margin="0,0,50,0"/>
+        </Grid>
+      </Border>
+      
+      <!-- Contenu de la page du lecteur de chapitre - s'assurer qu'il est visible et a le bon DataContext -->
+      <ContentControl Grid.Row="1"
+                     Content="{Binding ChapterReaderViewModel}"
+                     x:Name="ChapterReaderContainer">
+        <ContentControl.ContentTemplate>
+          <DataTemplate DataType="vm:ChapterReaderViewModel">
+            <views:ChapterReaderView DataContext="{Binding}" />
+          </DataTemplate>
+        </ContentControl.ContentTemplate>
+      </ContentControl>
+    </Grid>
   </Grid>
 </UserControl>

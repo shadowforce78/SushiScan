@@ -1,0 +1,126 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:SushiScan.ViewModels"
+             xmlns:conv="using:Avalonia.Data.Converters"
+             xmlns:paz="using:Avalonia.Controls.PanAndZoom"
+             xmlns:localconv="using:SushiScan.Converters"
+             x:Class="SushiScan.Views.ChapterReaderView"
+             x:DataType="vm:ChapterReaderViewModel">
+  
+  <Design.DataContext>
+    <vm:ChapterReaderViewModel/>
+  </Design.DataContext>
+
+  <Grid RowDefinitions="Auto,*,Auto">
+    
+    <!-- Header avec le titre du chapitre -->
+    <Border Grid.Row="0" Background="#2D2D30" Padding="16,12">
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock Grid.Column="0" 
+                   Text="{Binding ChapterDisplayTitle}" 
+                   FontSize="18" 
+                   FontWeight="Bold" 
+                   Foreground="White"
+                   VerticalAlignment="Center"/>
+        
+        <TextBlock Grid.Column="1" 
+                   Text="{Binding PageInfo}" 
+                   FontSize="14" 
+                   Foreground="#CCCCCC"
+                   VerticalAlignment="Center"/>
+      </Grid>
+    </Border>
+
+    <!-- Zone principale d'affichage -->
+    <Grid Grid.Row="1">
+      
+      <!-- Loading indicator -->
+      <Border Background="#1E1E1E" IsVisible="{Binding IsLoading}">
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+          <ProgressBar IsIndeterminate="True" Width="200" Height="4" Margin="0,0,0,16"/>
+          <TextBlock Text="Chargement du chapitre..." 
+                     Foreground="White" 
+                     FontSize="16" 
+                     HorizontalAlignment="Center"/>
+        </StackPanel>
+      </Border>
+
+      <!-- Error message -->
+      <Border Background="#1E1E1E" IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+          <TextBlock Text="⚠️" FontSize="48" HorizontalAlignment="Center" Margin="0,0,0,16"/>
+          <TextBlock Text="{Binding ErrorMessage}" 
+                     Foreground="#FF6B6B" 
+                     FontSize="16" 
+                     HorizontalAlignment="Center"
+                     TextWrapping="Wrap"
+                     MaxWidth="400"/>
+        </StackPanel>
+      </Border>
+
+      <!-- Images viewer - affiche toutes les pages -->
+      <ScrollViewer Grid.Row="0" 
+                   Background="#1E1E1E"
+                   HorizontalScrollBarVisibility="Disabled"
+                   VerticalScrollBarVisibility="Auto"
+                   IsVisible="{Binding CurrentChapter, Converter={x:Static ObjectConverters.IsNotNull}}">
+        
+        <ItemsControl ItemsSource="{Binding AllPages}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <Border Padding="0,5" HorizontalAlignment="Stretch">
+                <Image Source="{Binding}" 
+                       Stretch="Uniform"
+                       HorizontalAlignment="Center"
+                       MaxWidth="{Binding $parent[ScrollViewer].Bounds.Width}"/>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <StackPanel Orientation="Vertical" Spacing="10"/>
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+        </ItemsControl>
+      </ScrollViewer>
+    </Grid>
+
+    <!-- Footer avec contrôles de navigation -->
+    <Border Grid.Row="2" 
+            Background="#2D2D30" 
+            Padding="16,12"
+            IsVisible="{Binding CurrentChapter, Converter={x:Static ObjectConverters.IsNotNull}}">
+      
+      <Grid ColumnDefinitions="Auto,*,Auto">
+        
+        <!-- Bouton chapitre précédent -->
+        <Button Grid.Column="0" 
+                Command="{Binding PreviousChapterCommand}"
+                Background="#4CAF50" 
+                Foreground="White"
+                Padding="16,8"
+                CornerRadius="4"
+                BorderThickness="0">
+          <StackPanel Orientation="Horizontal">
+            <TextBlock Text="‹" FontSize="16" Margin="0,0,8,0"/>
+            <TextBlock Text="Chapitre précédent"/>
+          </StackPanel>
+        </Button>
+
+        <!-- Bouton chapitre suivant -->
+        <Button Grid.Column="2" 
+                Command="{Binding NextChapterCommand}"
+                Background="#4CAF50" 
+                Foreground="White"
+                Padding="16,8"
+                CornerRadius="4"
+                BorderThickness="0">
+          <StackPanel Orientation="Horizontal">
+            <TextBlock Text="Chapitre suivant"/>
+            <TextBlock Text="›" FontSize="16" Margin="8,0,0,0"/>
+          </StackPanel>
+        </Button>
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>

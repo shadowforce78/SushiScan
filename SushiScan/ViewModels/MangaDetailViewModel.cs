@@ -122,25 +122,52 @@ namespace SushiScan.ViewModels
         
         private void OpenReadingUrl(object? parameter)
         {
-            if (MangaDetail?.Url != null)
+            if (parameter is string url && MangaDetail != null)
             {
                 try
                 {
-                    // Ouvrir l'URL dans le navigateur par défaut
-                    var processStartInfo = new System.Diagnostics.ProcessStartInfo
+                    var scanName = string.Empty;
+                    var chapterNumber = "1"; // Par défaut chapitre 1
+                    
+                    // Déterminer le nom du scan depuis l'URL du paramètre ou des propriétés du manga
+                    if (parameter is string scanUrl)
                     {
-                        FileName = MangaDetail.Url,
-                        UseShellExecute = true
-                    };
-                    System.Diagnostics.Process.Start(processStartInfo);
-                    Console.WriteLine($"URL ouverte: {MangaDetail.Url}");
+                        foreach (var scanType in MangaDetail.ScanTypes)
+                        {
+                            if (scanType.Url == scanUrl)
+                            {
+                                scanName = scanType.Name;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (string.IsNullOrEmpty(scanName) && MangaDetail.ScanTypes.Count > 0)
+                    {
+                        // Utiliser le premier type de scan disponible si on ne trouve pas de correspondance
+                        scanName = MangaDetail.ScanTypes[0].Name;
+                    }
+                    
+                    Console.WriteLine($"Navigation vers le lecteur de chapitre - Titre: {MangaDetail.Title}, Scan: {scanName}, Chapitre: {chapterNumber}");
+                    
+                    // Créer une instance du ViewModel du lecteur
+                    var chapterReaderViewModel = new ChapterReaderViewModel();
+                    
+                    // Lancer le chargement du chapitre (asynchrone)
+                    _ = chapterReaderViewModel.LoadChapterAsync(MangaDetail.Title, scanName, chapterNumber);
+                    
+                    // Informer l'application du changement de vue en émettant un événement
+                    ChapterSelected?.Invoke(this, chapterReaderViewModel);
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Erreur lors de l'ouverture de l'URL: {ex.Message}");
-                    ErrorMessage = "Impossible d'ouvrir l'URL de lecture.";
+                    Console.WriteLine($"Erreur lors de la navigation vers le chapitre: {ex.Message}");
+                    ErrorMessage = "Impossible de charger le chapitre.";
                 }
             }
         }
+        
+        // Événement pour informer le MainViewModel qu'un chapitre a été sélectionné
+        public event EventHandler<ChapterReaderViewModel>? ChapterSelected;
     }
 }
