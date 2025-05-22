@@ -271,6 +271,76 @@ namespace SushiScan.Services
                 return new List<MangaSearchResult>();
             }
         }
+
+        // Méthode pour récupérer les détails d'un manga
+        public async Task<MangaDetail?> GetMangaDetailAsync(string title)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(title))
+                {
+                    Console.WriteLine("Titre du manga non fourni pour les détails");
+                    return null;
+                }
+                
+                // Convertir le titre pour l'URL
+                string encodedTitle = Uri.EscapeDataString(title);
+                string url = $"/scans/manga/{encodedTitle}";
+                
+                Console.WriteLine($"Récupération des détails du manga: {title}");
+                Console.WriteLine($"URL de l'API: {BaseUrl}{url}");
+                
+                var response = await _httpClient.GetAsync(url);
+                Console.WriteLine($"Statut de la réponse: {response.StatusCode}");
+                
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"Échec de la récupération des détails: {response.StatusCode}");
+                    return null;
+                }
+                
+                var content = await response.Content.ReadAsStringAsync();
+                
+                // Affichage du contenu pour le débogage (limité à 500 caractères)
+                Console.WriteLine($"Contenu de la réponse: {content.Substring(0, Math.Min(500, content.Length))}...");
+                
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                };
+                
+                // Désérialiser la réponse
+                var mangaDetail = JsonSerializer.Deserialize<MangaDetail>(content, options);
+                
+                if (mangaDetail == null)
+                {
+                    Console.WriteLine("La désérialisation des détails du manga a renvoyé null");
+                    return null;
+                }
+                
+                // Télécharger l'image du manga si une URL est fournie
+                if (!string.IsNullOrEmpty(mangaDetail.ImageUrl))
+                {
+                    mangaDetail.Image = await DownloadImageAsync(mangaDetail.ImageUrl);
+                }
+                else
+                {
+                    // Si pas d'URL d'image fournie, générer une URL basée sur le titre
+                    string slug = GenerateSlug(mangaDetail.Title);
+                    string imageUrl = $"{ImageBaseUrl}{slug}.jpg";
+                    mangaDetail.ImageUrl = imageUrl;
+                    mangaDetail.Image = await DownloadImageAsync(imageUrl);
+                }
+                
+                Console.WriteLine($"Détails du manga récupérés avec succès: {mangaDetail.Title}");
+                return mangaDetail;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ERREUR lors de la récupération des détails du manga: {ex.GetType().Name} - {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                return null;
+            }
+        }
     }
 }
-

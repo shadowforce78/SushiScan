@@ -209,40 +209,45 @@
             <ItemsControl.ItemTemplate>
               <DataTemplate x:DataType="models:Manga">
                 <Border Classes="mangaCard">
-                  <StackPanel Spacing="5" Margin="8">
-                    <!-- Image du manga -->
-                    <Border Height="200" CornerRadius="6" ClipToBounds="True">
-                      <Panel>
-                        <!-- Fallback pour quand l'image n'est pas encore chargée -->
-                        <Rectangle Fill="#333333"/>
-                        <Image Source="{Binding Image}" Stretch="UniformToFill"/>
-                      </Panel>
-                    </Border>
-                    
-                    <!-- Nom du manga -->
-                    <TextBlock Text="{Binding Name}"
-                               Foreground="White"
-                               FontWeight="SemiBold"
-                               TextWrapping="Wrap"
-                               MaxLines="2"
-                               TextTrimming="CharacterEllipsis"/>
-                    
-                    <!-- Genre principal -->
-                    <Border Background="#2D4263" 
-                            CornerRadius="4" 
-                            Padding="6,3" 
-                            HorizontalAlignment="Left">
-                      <TextBlock Text="{Binding MainGenre}"
+                  <Button Background="Transparent"
+                          Padding="0"
+                          Command="{Binding $parent[UserControl].DataContext.ShowMangaDetailCommand}"
+                          CommandParameter="{Binding Name}">
+                    <StackPanel Spacing="5" Margin="8">
+                      <!-- Image du manga -->
+                      <Border Height="200" CornerRadius="6" ClipToBounds="True">
+                        <Panel>
+                          <!-- Fallback pour quand l'image n'est pas encore chargée -->
+                          <Rectangle Fill="#333333"/>
+                          <Image Source="{Binding Image}" Stretch="UniformToFill"/>
+                        </Panel>
+                      </Border>
+                      
+                      <!-- Nom du manga -->
+                      <TextBlock Text="{Binding Name}"
                                  Foreground="White"
-                                 FontSize="11"/>
-                    </Border>
-                    
-                    <!-- Type -->
-                    <TextBlock Text="{Binding Type}"
-                               Foreground="#B3B3B3"
-                               FontSize="12"
-                               FontFamily="JetBrains Mono, Inter, Segoe UI"/>
-                  </StackPanel>
+                                 FontWeight="SemiBold"
+                                 TextWrapping="Wrap"
+                                 MaxLines="2"
+                                 TextTrimming="CharacterEllipsis"/>
+                      
+                      <!-- Genre principal -->
+                      <Border Background="#2D4263" 
+                              CornerRadius="4" 
+                              Padding="6,3" 
+                              HorizontalAlignment="Left">
+                        <TextBlock Text="{Binding MainGenre}"
+                                   Foreground="White"
+                                   FontSize="11"/>
+                      </Border>
+                      
+                      <!-- Type -->
+                      <TextBlock Text="{Binding Type}"
+                                 Foreground="#B3B3B3"
+                                 FontSize="12"
+                                 FontFamily="JetBrains Mono, Inter, Segoe UI"/>
+                    </StackPanel>
+                  </Button>
                 </Border>
               </DataTemplate>
             </ItemsControl.ItemTemplate>
@@ -263,40 +268,45 @@
             <ItemsControl.ItemTemplate>
               <DataTemplate x:DataType="models:Manga">
                 <Border Classes="mangaCard">
-                  <StackPanel Spacing="5" Margin="8">
-                    <!-- Image du manga -->
-                    <Border Height="200" CornerRadius="6" ClipToBounds="True">
-                      <Panel>
-                        <!-- Fallback pour quand l'image n'est pas encore chargée -->
-                        <Rectangle Fill="#333333"/>
-                        <Image Source="{Binding Image}" Stretch="UniformToFill"/>
-                      </Panel>
-                    </Border>
-                    
-                    <!-- Nom du manga -->
-                    <TextBlock Text="{Binding Name}"
-                               Foreground="White"
-                               FontWeight="SemiBold"
-                               TextWrapping="Wrap"
-                               MaxLines="2"
-                               TextTrimming="CharacterEllipsis"/>
-                    
-                    <!-- Genre principal -->
-                    <Border Background="#2D4263" 
-                            CornerRadius="4" 
-                            Padding="6,3" 
-                            HorizontalAlignment="Left">
-                      <TextBlock Text="{Binding MainGenre}"
+                  <Button Background="Transparent"
+                          Padding="0"
+                          Command="{Binding $parent[UserControl].DataContext.ShowMangaDetailCommand}"
+                          CommandParameter="{Binding Name}">
+                    <StackPanel Spacing="5" Margin="8">
+                      <!-- Image du manga -->
+                      <Border Height="200" CornerRadius="6" ClipToBounds="True">
+                        <Panel>
+                          <!-- Fallback pour quand l'image n'est pas encore chargée -->
+                          <Rectangle Fill="#333333"/>
+                          <Image Source="{Binding Image}" Stretch="UniformToFill"/>
+                        </Panel>
+                      </Border>
+                      
+                      <!-- Nom du manga -->
+                      <TextBlock Text="{Binding Name}"
                                  Foreground="White"
-                                 FontSize="11"/>
-                    </Border>
-                    
-                    <!-- Type -->
-                    <TextBlock Text="{Binding Type}"
-                               Foreground="#B3B3B3"
-                               FontSize="12"
-                               FontFamily="JetBrains Mono, Inter, Segoe UI"/>
-                  </StackPanel>
+                                 FontWeight="SemiBold"
+                                 TextWrapping="Wrap"
+                                 MaxLines="2"
+                                 TextTrimming="CharacterEllipsis"/>
+                      
+                      <!-- Genre principal -->
+                      <Border Background="#2D4263" 
+                              CornerRadius="4" 
+                              Padding="6,3" 
+                              HorizontalAlignment="Left">
+                        <TextBlock Text="{Binding MainGenre}"
+                                   Foreground="White"
+                                   FontSize="11"/>
+                      </Border>
+                      
+                      <!-- Type -->
+                      <TextBlock Text="{Binding Type}"
+                                 Foreground="#B3B3B3"
+                                 FontSize="12"
+                                 FontFamily="JetBrains Mono, Inter, Segoe UI"/>
+                    </StackPanel>
+                  </Button>
                 </Border>
               </DataTemplate>
             </ItemsControl.ItemTemplate>
@@ -317,40 +327,45 @@
             <ItemsControl.ItemTemplate>
               <DataTemplate x:DataType="models:Manga">
                 <Border Classes="mangaCard">
-                  <StackPanel Spacing="5" Margin="8">
-                    <!-- Image du manga -->
-                    <Border Height="200" CornerRadius="6" ClipToBounds="True">
-                      <Panel>
-                        <!-- Fallback pour quand l'image n'est pas encore chargée -->
-                        <Rectangle Fill="#333333"/>
-                        <Image Source="{Binding Image}" Stretch="UniformToFill"/>
-                      </Panel>
-                    </Border>
-                    
-                    <!-- Nom du manga -->
-                    <TextBlock Text="{Binding Name}"
-                               Foreground="White"
-                               FontWeight="SemiBold"
-                               FontFamily="JetBrains Mono, Inter, Segoe UI"
-                               TextWrapping="Wrap"
-                               Margin="0,5,0,0"/>
-                    
-                    <!-- Genre principal -->
-                    <Border Background="#2D4263" 
-                            CornerRadius="4" 
-                            Padding="6,3" 
-                            HorizontalAlignment="Left">
-                      <TextBlock Text="{Binding MainGenre}"
+                  <Button Background="Transparent"
+                          Padding="0"
+                          Command="{Binding $parent[UserControl].DataContext.ShowMangaDetailCommand}"
+                          CommandParameter="{Binding Name}">
+                    <StackPanel Spacing="5" Margin="8">
+                      <!-- Image du manga -->
+                      <Border Height="200" CornerRadius="6" ClipToBounds="True">
+                        <Panel>
+                          <!-- Fallback pour quand l'image n'est pas encore chargée -->
+                          <Rectangle Fill="#333333"/>
+                          <Image Source="{Binding Image}" Stretch="UniformToFill"/>
+                        </Panel>
+                      </Border>
+                      
+                      <!-- Nom du manga -->
+                      <TextBlock Text="{Binding Name}"
                                  Foreground="White"
-                                 FontSize="11"/>
-                    </Border>
-                    
-                    <!-- Type -->
-                    <TextBlock Text="{Binding Type}"
-                               Foreground="#B3B3B3"
-                               FontSize="12"
-                               FontFamily="JetBrains Mono, Inter, Segoe UI"/>
-                  </StackPanel>
+                                 FontWeight="SemiBold"
+                                 FontFamily="JetBrains Mono, Inter, Segoe UI"
+                                 TextWrapping="Wrap"
+                                 Margin="0,5,0,0"/>
+                      
+                      <!-- Genre principal -->
+                      <Border Background="#2D4263" 
+                              CornerRadius="4" 
+                              Padding="6,3" 
+                              HorizontalAlignment="Left">
+                        <TextBlock Text="{Binding MainGenre}"
+                                   Foreground="White"
+                                   FontSize="11"/>
+                      </Border>
+                      
+                      <!-- Type -->
+                      <TextBlock Text="{Binding Type}"
+                                 Foreground="#B3B3B3"
+                                 FontSize="12"
+                                 FontFamily="JetBrains Mono, Inter, Segoe UI"/>
+                    </StackPanel>
+                  </Button>
                 </Border>
               </DataTemplate>
             </ItemsControl.ItemTemplate>

@@ -12,6 +12,9 @@ namespace SushiScan.Views
     public partial class HomeView : UserControl
     {
         private HomeViewModel? ViewModel => DataContext as HomeViewModel;
+        
+        // Événement déclenché lorsqu'un manga est sélectionné
+        public event EventHandler<string>? OnMangaSelected;
 
         public HomeView()
         {
@@ -27,6 +30,7 @@ namespace SushiScan.Views
             {
                 Console.WriteLine("HomeView: DataContext déjà défini dans le constructeur");
                 LoadData();
+                SetupEventHandlers();
             }
             else
             {
@@ -38,6 +42,12 @@ namespace SushiScan.Views
         {
             // Lancer le chargement des données lorsque le DataContext (ViewModel) est défini
             Console.WriteLine($"HomeView: DataContextChanged déclenché, ViewModel est {(ViewModel != null ? "défini" : "null")}");
+            
+            if (ViewModel != null)
+            {
+                SetupEventHandlers();
+            }
+            
             LoadData();
         }
         
@@ -48,6 +58,20 @@ namespace SushiScan.Views
             {
                 ViewModel.SearchCommand.Execute(null);
                 e.Handled = true;
+            }
+        }
+        
+        private void SetupEventHandlers()
+        {
+            if (ViewModel != null)
+            {
+                // S'abonner à l'événement MangaSelected du ViewModel
+                ViewModel.MangaSelected += (sender, mangaTitle) =>
+                {
+                    Console.WriteLine($"HomeView: Manga sélectionné dans le ViewModel: {mangaTitle}");
+                    // Propager l'événement
+                    OnMangaSelected?.Invoke(this, mangaTitle);
+                };
             }
         }
 
