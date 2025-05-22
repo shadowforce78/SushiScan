@@ -103,7 +103,11 @@ namespace SushiScan.Services
         /// <summary>
         /// Charge un chapitre depuis le cache
         /// </summary>
-        public async Task<ChapterDetail?> LoadChapterFromCacheAsync(string mangaTitle, string scanName, string chapterNumber)
+        public async Task<ChapterDetail?> LoadChapterFromCacheAsync(
+            string mangaTitle, 
+            string scanName, 
+            string chapterNumber, 
+            IProgress<(int index, Bitmap? page)>? progressCallback = null)
         {
             try
             {
@@ -145,11 +149,15 @@ namespace SushiScan.Services
                         var bitmap = new Bitmap(fileStream);
                         chapter.Pages.Add(bitmap);
                         Console.WriteLine($"Image chargée depuis le cache: {imagePath}");
+                        
+                        // Notifier de la progression
+                        progressCallback?.Report((pageIndex, bitmap));
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine($"Erreur lors du chargement de l'image {imagePath}: {ex.Message}");
-                        chapter.Pages.Add(null); // Ajouter un espace réservé pour conserver l'index correct
+                        chapter.Pages.Add(null);
+                        progressCallback?.Report((pageIndex, null));
                     }
                     
                     pageIndex++;
