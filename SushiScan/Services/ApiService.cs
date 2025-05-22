@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -28,6 +29,14 @@ namespace SushiScan.Services
         {
             // Convertir en minuscules et remplacer les espaces par des tirets
             string slug = title.ToLower().Trim();
+            
+            // Remplacer les caractères accentués par leurs équivalents sans accent
+            slug = Regex.Replace(slug, "[éèêë]", "e");
+            slug = Regex.Replace(slug, "[àâä]", "a");
+            slug = Regex.Replace(slug, "[îï]", "i");
+            slug = Regex.Replace(slug, "[ôö]", "o");
+            slug = Regex.Replace(slug, "[ùûü]", "u");
+            slug = Regex.Replace(slug, "ç", "c");
             
             // Remplacer les caractères spéciaux et les espaces par des tirets
             slug = Regex.Replace(slug, @"[^a-z0-9\s-]", "");
@@ -140,5 +149,128 @@ namespace SushiScan.Services
                 return null;
             }
         }
+
+        // Méthode pour rechercher un manga par titre
+        public async Task<List<MangaSearchResult>> SearchMangaAsync(string title)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(title))
+                {
+                    return new List<MangaSearchResult>();
+                }
+
+                Console.WriteLine($"Recherche de manga avec le titre: {title}");
+                
+                // Convertir le titre pour l'URL et construire l'URL avec paramètre de recherche
+                string encodedTitle = Uri.EscapeDataString(title);
+                string url = $"/scans/manga/search?title={encodedTitle}";
+                
+                Console.WriteLine($"URL de recherche: {BaseUrl}{url}");
+                
+                var response = await _httpClient.GetAsync(url);
+                Console.WriteLine($"Statut de la réponse: {response.StatusCode}");
+                
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"Échec de la recherche: {response.StatusCode}");
+                    return new List<MangaSearchResult>();
+                }
+                
+                var content = await response.Content.ReadAsStringAsync();
+                
+                // Affichage du contenu pour le débogage
+                Console.WriteLine($"Contenu de la réponse: {content.Substring(0, Math.Min(500, content.Length))}...");
+
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                };
+                
+                List<MangaSearchResult> searchResults;
+                
+                // Essayer de déterminer si la réponse est un objet unique ou un tableau
+                if (content.StartsWith("[") && content.EndsWith("]"))
+                {
+                    // La réponse est un tableau
+                    searchResults = JsonSerializer.Deserialize<List<MangaSearchResult>>(content, options) ?? new List<MangaSearchResult>();
+                    Console.WriteLine("Format détecté: Tableau");
+                }
+                else if (content.StartsWith("{") && content.EndsWith("}"))
+                {
+                    // La réponse est un objet unique ou un wrapper
+                    try
+                    {
+                        // Tenter de désérialiser comme un objet unique
+                        var singleResult = JsonSerializer.Deserialize<MangaSearchResult>(content, options);
+                        searchResults = singleResult != null ? new List<MangaSearchResult> { singleResult } : new List<MangaSearchResult>();
+                        Console.WriteLine("Format détecté: Objet unique");
+                    }
+                    catch
+                    {
+                        // Peut-être un wrapper avec une propriété contenant les résultats
+                        try 
+                        {
+                            var responseObject = JsonDocument.Parse(content);
+                            searchResults = new List<MangaSearchResult>();
+                            
+                            foreach (var property in responseObject.RootElement.EnumerateObject())
+                            {
+                                Console.WriteLine($"Propriété trouvée dans la réponse: {property.Name}");
+                                if (property.Value.ValueKind == JsonValueKind.Array)
+                                {
+                                    // Extraire le tableau de cette propriété
+                                    var arrayJson = property.Value.GetRawText();
+                                    var results = JsonSerializer.Deserialize<List<MangaSearchResult>>(arrayJson, options);
+                                    if (results != null)
+                                    {
+                                        searchResults.AddRange(results);
+                                    }
+                                    Console.WriteLine($"Résultats extraits de la propriété '{property.Name}'");
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Erreur lors de l'analyse du JSON: {ex.Message}");
+                            return new List<MangaSearchResult>();
+                        }
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Format JSON non reconnu");
+                    return new List<MangaSearchResult>();
+                }
+                
+                Console.WriteLine($"Résultats trouvés: {searchResults.Count}");
+                
+                // Télécharger les images pour chaque résultat
+                foreach (var result in searchResults)
+                {
+                    if (!string.IsNullOrEmpty(result.ImageUrl))
+                    {
+                        result.Image = await DownloadImageAsync(result.ImageUrl);
+                    }
+                    else
+                    {
+                        // Si pas d'URL d'image fournie, générer une URL basée sur le titre
+                        string slug = GenerateSlug(result.Title);
+                        string imageUrl = $"{ImageBaseUrl}{slug}.jpg";
+                        result.ImageUrl = imageUrl;
+                        result.Image = await DownloadImageAsync(imageUrl);
+                    }
+                }
+                
+                return searchResults;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ERREUR recherche: {ex.GetType().Name} - {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                return new List<MangaSearchResult>();
+            }
+        }
     }
 }
+

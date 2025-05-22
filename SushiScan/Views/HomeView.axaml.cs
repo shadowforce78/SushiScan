@@ -5,6 +5,7 @@ using SushiScan.ViewModels;
 using System;
 using System.Threading.Tasks;
 using Avalonia.Threading;
+using Avalonia.Input;
 
 namespace SushiScan.Views
 {
@@ -38,6 +39,16 @@ namespace SushiScan.Views
             // Lancer le chargement des données lorsque le DataContext (ViewModel) est défini
             Console.WriteLine($"HomeView: DataContextChanged déclenché, ViewModel est {(ViewModel != null ? "défini" : "null")}");
             LoadData();
+        }
+        
+        // Méthode pour gérer l'événement KeyDown sur la barre de recherche
+        private void OnSearchBoxKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter && ViewModel != null)
+            {
+                ViewModel.SearchCommand.Execute(null);
+                e.Handled = true;
+            }
         }
 
         private void LoadData()

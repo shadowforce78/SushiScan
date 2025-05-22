@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Avalonia.Media.Imaging;
 using SushiScan.Models;
 using SushiScan.Services;
@@ -13,6 +14,9 @@ namespace SushiScan.ViewModels
         private readonly ApiService _apiService;
         private bool _isLoading;
         private string _errorMessage = string.Empty;
+        private string _searchQuery = string.Empty;
+        private bool _isSearching;
+        private bool _showSearchResults;
         
         public string Title { get; } = "SushiScan";
         public string TrendingMangasTitle { get; } = "Tendances";
@@ -22,6 +26,7 @@ namespace SushiScan.ViewModels
         public ObservableCollection<Manga> TrendingMangas { get; } = new();
         public ObservableCollection<Manga> PopularMangas { get; } = new();
         public ObservableCollection<Manga> RecommendedMangas { get; } = new();
+        public ObservableCollection<MangaSearchResult> SearchResults { get; } = new();
         
         public bool IsLoading 
         { 
@@ -48,11 +53,100 @@ namespace SushiScan.ViewModels
                 }
             }
         }
+
+        public string SearchQuery
+        {
+            get => _searchQuery;
+            set
+            {
+                if (_searchQuery != value)
+                {
+                    _searchQuery = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public bool IsSearching
+        {
+            get => _isSearching;
+            private set
+            {
+                if (_isSearching != value)
+                {
+                    _isSearching = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public bool ShowSearchResults
+        {
+            get => _showSearchResults;
+            private set
+            {
+                if (_showSearchResults != value)
+                {
+                    _showSearchResults = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public ICommand SearchCommand { get; }
+        public ICommand ClearSearchCommand { get; }
         
         public HomeViewModel()
         {
             Console.WriteLine("HomeViewModel: Initialisation");
             _apiService = new ApiService();
+
+            SearchCommand = new RelayCommand(async _ => await SearchMangaAsync());
+            ClearSearchCommand = new RelayCommand(_ => ClearSearch());
+        }
+        
+        private async Task SearchMangaAsync()
+        {
+            if (string.IsNullOrWhiteSpace(SearchQuery))
+            {
+                return;
+            }
+
+            try
+            {
+                ErrorMessage = string.Empty;
+                IsSearching = true;
+                ShowSearchResults = true;
+                
+                Console.WriteLine($"Recherche de mangas avec query: {SearchQuery}");
+                
+                SearchResults.Clear();
+                var results = await _apiService.SearchMangaAsync(SearchQuery);
+                
+                foreach (var result in results)
+                {
+                    SearchResults.Add(result);
+                }
+                
+                Console.WriteLine($"Recherche terminée, {results.Count} résultats trouvés");
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = "Erreur lors de la recherche : " + ex.Message;
+                Console.WriteLine($"Erreur de recherche: {ex}");
+            }
+            finally
+            {
+                IsSearching = false;
+            }
+        }
+        
+        private void ClearSearch()
+        {
+            SearchQuery = string.Empty;
+            SearchResults.Clear();
+            ShowSearchResults = false;
+            ErrorMessage = string.Empty;
         }
         
         public async Task LoadDataAsync()
@@ -103,19 +197,44 @@ namespace SushiScan.ViewModels
             }
             catch (Exception ex)
             {
-                ErrorMessage = $"Une erreur s'est produite: {ex.Message}";
-                Console.WriteLine($"HomeViewModel: Exception: {ex.GetType().Name} - {ex.Message}");
-                if (ex.InnerException != null)
-                {
-                    Console.WriteLine($"HomeViewModel: Exception interne: {ex.InnerException.Message}");
-                }
-                Console.WriteLine($"HomeViewModel: Stack trace: {ex.StackTrace}");
+                ErrorMessage = $"Erreur lors du chargement des données: {ex.Message}";
+                Console.WriteLine($"HomeViewModel: Exception: {ex}");
             }
             finally
             {
                 IsLoading = false;
                 Console.WriteLine("HomeViewModel: IsLoading = false");
             }
+        }
+    }
+
+    // Classe RelayCommand pour implémenter ICommand
+    public class RelayCommand : ICommand
+    {
+        private readonly Action<object> _execute;
+        private readonly Predicate<object> _canExecute;
+
+        public RelayCommand(Action<object> execute, Predicate<object> canExecute = null)
+        {
+            _execute = execute ?? throw new ArgumentNullException(nameof(execute));
+            _canExecute = canExecute;
+        }
+
+        public bool CanExecute(object parameter)
+        {
+            return _canExecute == null || _canExecute(parameter);
+        }
+
+        public void Execute(object parameter)
+        {
+            _execute(parameter);
+        }
+
+        public event EventHandler CanExecuteChanged;
+
+        public void RaiseCanExecuteChanged()
+        {
+            CanExecuteChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 }
