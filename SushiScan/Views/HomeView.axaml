@@ -64,55 +64,187 @@
     
     <!-- Contenu principal -->
     <ScrollViewer Grid.Row="1" Padding="10,0">
-      <StackPanel>
-        <!-- Section des mangas populaires -->
-        <TextBlock Text="{Binding PopularMangasTitle}" 
-                   Classes="sectionTitle"/>
+      <StackPanel Spacing="15">
+        <!-- Message d'erreur (si présent) -->
+        <TextBlock Text="{Binding ErrorMessage}"
+                   Foreground="#FF5252"
+                   FontWeight="Medium"
+                   HorizontalAlignment="Center"
+                   Margin="0,10,0,0"
+                   IsVisible="{Binding !!ErrorMessage}"/>
         
-        <!-- Grille de mangas -->
-        <ItemsControl ItemsSource="{Binding PopularMangas}">
-          <ItemsControl.ItemsPanel>
-            <ItemsPanelTemplate>
-              <WrapPanel HorizontalAlignment="Center"/>
-            </ItemsPanelTemplate>
-          </ItemsControl.ItemsPanel>
-          <ItemsControl.ItemTemplate>
-            <DataTemplate x:DataType="models:Manga">
-              <Border Classes="mangaCard">
-                <StackPanel Spacing="5" Margin="8">
-                  <!-- Image du manga -->
-                  <Border Height="200" CornerRadius="6" ClipToBounds="True">
-                    <Image Source="{Binding ImagePath}" Stretch="UniformToFill"/>
-                  </Border>
-                  
-                  <!-- Nom du manga -->
-                  <TextBlock Text="{Binding Name}"
-                             Foreground="White"
-                             FontWeight="SemiBold"
-                             FontFamily="JetBrains Mono, Inter, Segoe UI"
-                             TextWrapping="Wrap"
-                             Margin="0,5,0,0"/>
-                  
-                  <!-- Genre principal -->
-                  <Border Background="#2D4263" 
-                          CornerRadius="4" 
-                          Padding="6,3" 
-                          HorizontalAlignment="Left">
-                    <TextBlock Text="{Binding MainGenre}"
+        <!-- Indicateur de chargement -->
+        <ProgressBar IsIndeterminate="True"
+                     IsVisible="{Binding IsLoading}"
+                     HorizontalAlignment="Center"
+                     Width="200"
+                     Margin="0,20"/>
+        
+        <!-- Section des mangas tendances -->
+        <StackPanel>
+          <TextBlock Text="{Binding TrendingMangasTitle}" 
+                     Classes="sectionTitle"/>
+          
+          <ItemsControl ItemsSource="{Binding TrendingMangas}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <WrapPanel HorizontalAlignment="Center"/>
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="models:Manga">
+                <Border Classes="mangaCard">
+                  <StackPanel Spacing="5" Margin="8">
+                    <!-- Image du manga -->
+                    <Border Height="200" CornerRadius="6" ClipToBounds="True">
+                      <Panel>
+                        <!-- Fallback pour quand l'image n'est pas encore chargée -->
+                        <Rectangle Fill="#333333" Height="200"/>
+                        <!-- Image chargée depuis l'API -->
+                        <Image Source="{Binding Image}" Stretch="UniformToFill"/>
+                      </Panel>
+                    </Border>
+                    
+                    <!-- Nom du manga -->
+                    <TextBlock Text="{Binding Name}"
                                Foreground="White"
-                               FontSize="11"
+                               FontWeight="SemiBold"
+                               FontFamily="JetBrains Mono, Inter, Segoe UI"
+                               TextWrapping="Wrap"
+                               Margin="0,5,0,0"/>
+                    
+                    <!-- Genre principal -->
+                    <Border Background="#2D4263" 
+                            CornerRadius="4" 
+                            Padding="6,3" 
+                            HorizontalAlignment="Left">
+                      <TextBlock Text="{Binding MainGenre}"
+                                 Foreground="White"
+                                 FontSize="11"/>
+                    </Border>
+                    
+                    <!-- Type -->
+                    <TextBlock Text="{Binding Type}"
+                               Foreground="#B3B3B3"
+                               FontSize="12"
                                FontFamily="JetBrains Mono, Inter, Segoe UI"/>
-                  </Border>
-                </StackPanel>
-              </Border>
-            </DataTemplate>
-          </ItemsControl.ItemTemplate>
-        </ItemsControl>
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
         
-        <!-- Bouton "Voir plus" -->
-        <Button Content="Voir plus"
-                Command="{Binding ViewMoreMangas}"
-                Classes="viewMore"/>
+        <!-- Section des mangas populaires -->
+        <StackPanel>
+          <TextBlock Text="{Binding PopularMangasTitle}" 
+                     Classes="sectionTitle"/>
+          
+          <ItemsControl ItemsSource="{Binding PopularMangas}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <WrapPanel HorizontalAlignment="Center"/>
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="models:Manga">
+                <Border Classes="mangaCard">
+                  <StackPanel Spacing="5" Margin="8">
+                    <!-- Image du manga -->
+                    <Border Height="200" CornerRadius="6" ClipToBounds="True">
+                      <Panel>
+                        <!-- Fallback pour quand l'image n'est pas encore chargée -->
+                        <Rectangle Fill="#333333" Height="200"/>
+                        <!-- Image chargée depuis l'API -->
+                        <Image Source="{Binding Image}" Stretch="UniformToFill"/>
+                      </Panel>
+                    </Border>
+                    
+                    <!-- Nom du manga -->
+                    <TextBlock Text="{Binding Name}"
+                               Foreground="White"
+                               FontWeight="SemiBold"
+                               FontFamily="JetBrains Mono, Inter, Segoe UI"
+                               TextWrapping="Wrap"
+                               Margin="0,5,0,0"/>
+                    
+                    <!-- Genre principal -->
+                    <Border Background="#2D4263" 
+                            CornerRadius="4" 
+                            Padding="6,3" 
+                            HorizontalAlignment="Left">
+                      <TextBlock Text="{Binding MainGenre}"
+                                 Foreground="White"
+                                 FontSize="11"/>
+                    </Border>
+                    
+                    <!-- Type -->
+                    <TextBlock Text="{Binding Type}"
+                               Foreground="#B3B3B3"
+                               FontSize="12"
+                               FontFamily="JetBrains Mono, Inter, Segoe UI"/>
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+        
+        <!-- Section des mangas recommandés -->
+        <StackPanel>
+          <TextBlock Text="{Binding RecommendedMangasTitle}" 
+                     Classes="sectionTitle"/>
+          
+          <ItemsControl ItemsSource="{Binding RecommendedMangas}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <WrapPanel HorizontalAlignment="Center"/>
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="models:Manga">
+                <Border Classes="mangaCard">
+                  <StackPanel Spacing="5" Margin="8">
+                    <!-- Image du manga -->
+                    <Border Height="200" CornerRadius="6" ClipToBounds="True">
+                      <Panel>
+                        <!-- Fallback pour quand l'image n'est pas encore chargée -->
+                        <Rectangle Fill="#333333" Height="200"/>
+                        <!-- Image chargée depuis l'API -->
+                        <Image Source="{Binding Image}" Stretch="UniformToFill"/>
+                      </Panel>
+                    </Border>
+                    
+                    <!-- Nom du manga -->
+                    <TextBlock Text="{Binding Name}"
+                               Foreground="White"
+                               FontWeight="SemiBold"
+                               FontFamily="JetBrains Mono, Inter, Segoe UI"
+                               TextWrapping="Wrap"
+                               Margin="0,5,0,0"/>
+                    
+                    <!-- Genre principal -->
+                    <Border Background="#2D4263" 
+                            CornerRadius="4" 
+                            Padding="6,3" 
+                            HorizontalAlignment="Left">
+                      <TextBlock Text="{Binding MainGenre}"
+                                 Foreground="White"
+                                 FontSize="11"/>
+                    </Border>
+                    
+                    <!-- Type -->
+                    <TextBlock Text="{Binding Type}"
+                               Foreground="#B3B3B3"
+                               FontSize="12"
+                               FontFamily="JetBrains Mono, Inter, Segoe UI"/>
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+
       </StackPanel>
     </ScrollViewer>
   </Grid>

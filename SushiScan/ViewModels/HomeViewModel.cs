@@ -1,73 +1,121 @@
-
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
 using SushiScan.Models;
+using SushiScan.Services;
 
 namespace SushiScan.ViewModels
 {
     public class HomeViewModel : ViewModelBase
     {
-        public string Title { get; } = "ScanVerse";
-        public string PopularMangasTitle { get; } = "Mangas Populaires";
+        private readonly ApiService _apiService;
+        private bool _isLoading;
+        private string _errorMessage = string.Empty;
         
-        public ObservableCollection<Manga> PopularMangas { get; }
+        public string Title { get; } = "SushiScan";
+        public string TrendingMangasTitle { get; } = "Tendances";
+        public string PopularMangasTitle { get; } = "Populaires";
+        public string RecommendedMangasTitle { get; } = "Recommandés";
+        
+        public ObservableCollection<Manga> TrendingMangas { get; } = new();
+        public ObservableCollection<Manga> PopularMangas { get; } = new();
+        public ObservableCollection<Manga> RecommendedMangas { get; } = new();
+        
+        public bool IsLoading 
+        { 
+            get => _isLoading;
+            private set
+            {
+                if (_isLoading != value)
+                {
+                    _isLoading = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+        
+        public string ErrorMessage 
+        { 
+            get => _errorMessage;
+            private set
+            {
+                if (_errorMessage != value)
+                {
+                    _errorMessage = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
         
         public HomeViewModel()
         {
-            // Données mockées pour les mangas populaires
-            PopularMangas = new ObservableCollection<Manga>
-            {
-                new Manga 
-                { 
-                    Id = "1", 
-                    Name = "One Piece", 
-                    MainGenre = "Action/Aventure", 
-                    ImagePath = "avares://SushiScan/Assets/manga1.jpg" 
-                },
-                new Manga 
-                { 
-                    Id = "2", 
-                    Name = "Demon Slayer", 
-                    MainGenre = "Action/Fantastique", 
-                    ImagePath = "avares://SushiScan/Assets/manga2.jpg" 
-                },
-                new Manga 
-                { 
-                    Id = "3", 
-                    Name = "Jujutsu Kaisen", 
-                    MainGenre = "Action/Surnaturel", 
-                    ImagePath = "avares://SushiScan/Assets/manga3.jpg" 
-                },
-                new Manga 
-                { 
-                    Id = "4", 
-                    Name = "Chainsaw Man", 
-                    MainGenre = "Action/Horreur", 
-                    ImagePath = "avares://SushiScan/Assets/manga4.jpg" 
-                },
-                new Manga 
-                { 
-                    Id = "5", 
-                    Name = "My Hero Academia", 
-                    MainGenre = "Action/Super-héros", 
-                    ImagePath = "avares://SushiScan/Assets/manga5.jpg" 
-                },
-                new Manga 
-                { 
-                    Id = "6", 
-                    Name = "Tokyo Revengers", 
-                    MainGenre = "Action/Drame", 
-                    ImagePath = "avares://SushiScan/Assets/manga6.jpg" 
-                }
-            };
+            Console.WriteLine("HomeViewModel: Initialisation");
+            _apiService = new ApiService();
         }
         
-        public void ViewMoreMangas()
+        public async Task LoadDataAsync()
         {
-            // À implémenter: logique pour voir plus de mangas
-            // Cette méthode sera associée au bouton "Voir plus"
+            Console.WriteLine("HomeViewModel: Début du chargement des données");
+            try
+            {
+                IsLoading = true;
+                Console.WriteLine("HomeViewModel: IsLoading = true");
+                
+                // Charger les données depuis l'API
+                Console.WriteLine("HomeViewModel: Appel de GetHomePageDataAsync()");
+                var homePageData = await _apiService.GetHomePageDataAsync();
+                Console.WriteLine($"HomeViewModel: Données reçues de l'API: {(homePageData != null ? "OK" : "NULL")}");
+                
+                if (homePageData != null)
+                {
+                    // Effacer les collections existantes
+                    TrendingMangas.Clear();
+                    PopularMangas.Clear();
+                    RecommendedMangas.Clear();
+                    Console.WriteLine("HomeViewModel: Collections vidées");
+                    
+                    // Ajouter les nouvelles données
+                    foreach (var manga in homePageData.Trending)
+                    {
+                        TrendingMangas.Add(manga);
+                    }
+                    Console.WriteLine($"HomeViewModel: {homePageData.Trending.Count} mangas ajoutés à TrendingMangas");
+                    
+                    foreach (var manga in homePageData.Popular)
+                    {
+                        PopularMangas.Add(manga);
+                    }
+                    Console.WriteLine($"HomeViewModel: {homePageData.Popular.Count} mangas ajoutés à PopularMangas");
+                    
+                    foreach (var manga in homePageData.Recommended)
+                    {
+                        RecommendedMangas.Add(manga);
+                    }
+                    Console.WriteLine($"HomeViewModel: {homePageData.Recommended.Count} mangas ajoutés à RecommendedMangas");
+                }
+                else
+                {
+                    ErrorMessage = "Impossible de récupérer les données. Veuillez réessayer plus tard.";
+                    Console.WriteLine($"HomeViewModel: Erreur définie: {ErrorMessage}");
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Une erreur s'est produite: {ex.Message}";
+                Console.WriteLine($"HomeViewModel: Exception: {ex.GetType().Name} - {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"HomeViewModel: Exception interne: {ex.InnerException.Message}");
+                }
+                Console.WriteLine($"HomeViewModel: Stack trace: {ex.StackTrace}");
+            }
+            finally
+            {
+                IsLoading = false;
+                Console.WriteLine("HomeViewModel: IsLoading = false");
+            }
         }
     }
 }
