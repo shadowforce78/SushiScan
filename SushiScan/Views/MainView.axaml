@@ -6,6 +6,7 @@
              xmlns:views="clr-namespace:SushiScan.Views"
              mc:Ignorable="d" d:DesignWidth="720" d:DesignHeight="1280"
              x:Class="SushiScan.Views.MainView"
+             x:Name="RootMainView"
              x:DataType="vm:MainViewModel">
   <Design.DataContext>
     <!-- This only sets the DataContext for the previewer in an IDE,
@@ -16,7 +17,7 @@
   <Grid>
     <!-- Page d'accueil - visible quand ShowMangaDetail est false -->
     <views:HomeView DataContext="{Binding HomeViewModel}" 
-                    IsVisible="{Binding $parent.DataContext.ShowHomeView}"
+                    IsVisible="{Binding ElementName=RootMainView, Path=DataContext.ShowHomeView}"
                     Name="HomeView"/>
     
     <!-- Page de détails du manga - visible quand ShowMangaDetail est true -->

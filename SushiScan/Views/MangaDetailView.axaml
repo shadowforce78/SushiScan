@@ -190,7 +190,7 @@
                             Padding="15,5"
                             Background="#2D4263"
                             Foreground="White"
-                            Command="{Binding $parent[UserControl].DataContext.OpenReadingUrlCommand}"
+                            Command="{Binding $parent[ItemsControl].DataContext.OpenReadingUrlCommand}"
                             CornerRadius="4">
                       <Button.CommandParameter>
                         <Binding Path="Url"/>

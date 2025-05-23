@@ -211,7 +211,7 @@
                 <Border Classes="mangaCard">
                   <Button Background="Transparent"
                           Padding="0"
-                          Command="{Binding $parent[UserControl].DataContext.ShowMangaDetailCommand}"
+                          Command="{Binding $parent[ItemsControl].DataContext.ShowMangaDetailCommand}"
                           CommandParameter="{Binding Name}">
                     <StackPanel Spacing="5" Margin="8">
                       <!-- Image du manga -->
@@ -270,7 +270,7 @@
                 <Border Classes="mangaCard">
                   <Button Background="Transparent"
                           Padding="0"
-                          Command="{Binding $parent[UserControl].DataContext.ShowMangaDetailCommand}"
+                          Command="{Binding $parent[ItemsControl].DataContext.ShowMangaDetailCommand}"
                           CommandParameter="{Binding Name}">
                     <StackPanel Spacing="5" Margin="8">
                       <!-- Image du manga -->
@@ -329,7 +329,7 @@
                 <Border Classes="mangaCard">
                   <Button Background="Transparent"
                           Padding="0"
-                          Command="{Binding $parent[UserControl].DataContext.ShowMangaDetailCommand}"
+                          Command="{Binding $parent[ItemsControl].DataContext.ShowMangaDetailCommand}"
                           CommandParameter="{Binding Name}">
                     <StackPanel Spacing="5" Margin="8">
                       <!-- Image du manga -->
