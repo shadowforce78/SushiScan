@@ -92,7 +92,7 @@
                    IsVisible="{Binding !!ErrorMessage}"/>
         
         <!-- Contenu principal - visible uniquement quand les données sont chargées -->
-        <StackPanel IsVisible="{Binding HasData}" Spacing="10">
+        <StackPanel IsVisible="{Binding HasData}" Spacing="10" Margin="0,0,0,50">
           <!-- Image et titre -->
           <Border Width="200" Height="300" 
                   HorizontalAlignment="Center"
@@ -102,7 +102,7 @@
             <Panel>
               <Rectangle Fill="#333333"/>
               <Image Source="{Binding MangaDetail.Image}" Stretch="UniformToFill"/>
-            </Panel>
+            </Panel> 
           </Border>
           
           <!-- Titre principal -->
@@ -169,7 +169,7 @@
           <ItemsControl ItemsSource="{Binding MangaDetail.ScanTypes}">
             <ItemsControl.ItemsPanel>
               <ItemsPanelTemplate>
-                <StackPanel Spacing="10"/>
+                <StackPanel VerticalAlignment="Top" Spacing="10"/>
               </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>

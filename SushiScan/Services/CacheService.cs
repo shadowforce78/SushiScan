@@ -10,21 +10,29 @@ namespace SushiScan.Services
 {
     public class CacheService
     {
-        private readonly string _cacheDirectory;
+        private readonly string _chapterCacheDirectory;
+        private readonly string _coverCacheDirectory;
         
         public CacheService()
         {
-            // Créer un dossier dans AppData pour le cache
-            _cacheDirectory = Path.Combine(
+            // Créer les dossiers dans AppData pour le cache
+            string baseDirectory = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "SushiScan", 
-                "ChapterCache"
+                "SushiScan"
             );
             
-            // S'assurer que le répertoire existe
-            Directory.CreateDirectory(_cacheDirectory);
-            Console.WriteLine($"Répertoire de cache initialisé: {_cacheDirectory}");
+            _chapterCacheDirectory = Path.Combine(baseDirectory, "ChapterCache");
+            _coverCacheDirectory = Path.Combine(baseDirectory, "CoverCache");
+            
+            // S'assurer que les répertoires existent
+            Directory.CreateDirectory(_chapterCacheDirectory);
+            Directory.CreateDirectory(_coverCacheDirectory);
+            
+            Console.WriteLine($"Répertoire de cache chapitres: {_chapterCacheDirectory}");
+            Console.WriteLine($"Répertoire de cache couvertures: {_coverCacheDirectory}");
         }
+
+        #region Chapter Cache
 
         /// <summary>
         /// Génère une clé unique pour un chapitre
@@ -40,7 +48,7 @@ namespace SushiScan.Services
         public bool IsChapterCached(string mangaTitle, string scanName, string chapterNumber)
         {
             string chapterKey = GenerateChapterKey(mangaTitle, scanName, chapterNumber);
-            string metadataPath = Path.Combine(_cacheDirectory, $"{chapterKey}_metadata.json");
+            string metadataPath = Path.Combine(_chapterCacheDirectory, $"{chapterKey}_metadata.json");
             
             return File.Exists(metadataPath);
         }
@@ -53,8 +61,8 @@ namespace SushiScan.Services
             try
             {
                 string chapterKey = GenerateChapterKey(chapter.MangaTitle, chapter.ScanName, chapter.Number);
-                string metadataPath = Path.Combine(_cacheDirectory, $"{chapterKey}_metadata.json");
-                string imagesDirPath = Path.Combine(_cacheDirectory, chapterKey);
+                string metadataPath = Path.Combine(_chapterCacheDirectory, $"{chapterKey}_metadata.json");
+                string imagesDirPath = Path.Combine(_chapterCacheDirectory, chapterKey);
                 
                 // Créer le dossier pour les images si nécessaire
                 Directory.CreateDirectory(imagesDirPath);
@@ -112,8 +120,8 @@ namespace SushiScan.Services
             try
             {
                 string chapterKey = GenerateChapterKey(mangaTitle, scanName, chapterNumber);
-                string metadataPath = Path.Combine(_cacheDirectory, $"{chapterKey}_metadata.json");
-                string imagesDirPath = Path.Combine(_cacheDirectory, chapterKey);
+                string metadataPath = Path.Combine(_chapterCacheDirectory, $"{chapterKey}_metadata.json");
+                string imagesDirPath = Path.Combine(_chapterCacheDirectory, chapterKey);
 
                 if (!File.Exists(metadataPath) || !Directory.Exists(imagesDirPath))
                 {
@@ -187,8 +195,8 @@ namespace SushiScan.Services
             try
             {
                 string chapterKey = GenerateChapterKey(mangaTitle, scanName, chapterNumber);
-                string metadataPath = Path.Combine(_cacheDirectory, $"{chapterKey}_metadata.json");
-                string imagesDirPath = Path.Combine(_cacheDirectory, chapterKey);
+                string metadataPath = Path.Combine(_chapterCacheDirectory, $"{chapterKey}_metadata.json");
+                string imagesDirPath = Path.Combine(_chapterCacheDirectory, chapterKey);
 
                 if (File.Exists(metadataPath))
                 {
@@ -199,44 +207,105 @@ namespace SushiScan.Services
                 {
                     Directory.Delete(imagesDirPath, true);
                 }
-
+                
                 Console.WriteLine($"Cache du chapitre supprimé: {chapterKey}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erreur lors de la suppression du cache: {ex.Message}");
+                Console.WriteLine($"Erreur lors de la suppression du cache du chapitre: {ex.Message}");
             }
         }
-
+        
+        #endregion
+        
+        #region Cover Cache
+        
         /// <summary>
-        /// Supprime tous les chapitres du cache
+        /// Génère une clé unique pour une couverture de manga
         /// </summary>
-        public void ClearAllCache()
+        private string GenerateCoverKey(string mangaTitle)
+        {
+            // Utiliser le slug pour la cohérence avec l'ApiService
+            return mangaTitle.ToLower()
+                .Replace(" ", "-")
+                .Replace("é", "e")
+                .Replace("è", "e")
+                .Replace("ê", "e")
+                .Replace("ë", "e")
+                .Replace("à", "a")
+                .Replace("â", "a")
+                .Replace("ä", "a")
+                .Replace("î", "i")
+                .Replace("ï", "i")
+                .Replace("ô", "o")
+                .Replace("ö", "o")
+                .Replace("ù", "u")
+                .Replace("û", "u")
+                .Replace("ü", "u")
+                .Replace("ç", "c");
+        }
+        
+        /// <summary>
+        /// Vérifie si une couverture de manga est déjà en cache
+        /// </summary>
+        public bool IsCoverCached(string mangaTitle)
+        {
+            string coverKey = GenerateCoverKey(mangaTitle);
+            string coverPath = Path.Combine(_coverCacheDirectory, $"{coverKey}.jpg");
+            
+            return File.Exists(coverPath);
+        }
+        
+        /// <summary>
+        /// Sauvegarde une couverture de manga dans le cache
+        /// </summary>
+        public async Task SaveCoverToCacheAsync(string mangaTitle, Bitmap cover)
         {
             try
             {
-                if (Directory.Exists(_cacheDirectory))
-                {
-                    var directories = Directory.GetDirectories(_cacheDirectory);
-                    var files = Directory.GetFiles(_cacheDirectory, "*_metadata.json");
-
-                    foreach (var dir in directories)
-                    {
-                        Directory.Delete(dir, true);
-                    }
-
-                    foreach (var file in files)
-                    {
-                        File.Delete(file);
-                    }
-                }
-
-                Console.WriteLine("Cache entièrement vidé");
+                string coverKey = GenerateCoverKey(mangaTitle);
+                string coverPath = Path.Combine(_coverCacheDirectory, $"{coverKey}.jpg");
+                
+                using var fileStream = File.Create(coverPath);
+                cover.Save(fileStream);
+                
+                Console.WriteLine($"Couverture mise en cache avec succès: {coverPath}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erreur lors du vidage du cache: {ex.Message}");
+                Console.WriteLine($"Erreur lors de la sauvegarde de la couverture en cache: {ex.Message}");
             }
         }
+        
+        /// <summary>
+        /// Charge une couverture de manga depuis le cache
+        /// </summary>
+        public Bitmap? LoadCoverFromCache(string mangaTitle)
+        {
+            try
+            {
+                string coverKey = GenerateCoverKey(mangaTitle);
+                string coverPath = Path.Combine(_coverCacheDirectory, $"{coverKey}.jpg");
+                
+                if (!File.Exists(coverPath))
+                {
+                    Console.WriteLine($"Couverture non trouvée en cache: {coverKey}");
+                    return null;
+                }
+                
+                using var fileStream = File.OpenRead(coverPath);
+                var bitmap = new Bitmap(fileStream);
+                
+                Console.WriteLine($"Couverture chargée depuis le cache: {coverPath}");
+                return bitmap;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur lors du chargement de la couverture depuis le cache: {ex.Message}");
+                return null;
+            }
+        }
+        
+        #endregion
     }
 }

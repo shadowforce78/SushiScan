@@ -110,7 +110,7 @@
                    Margin="0,10,0,0"
                    IsVisible="{Binding !!ErrorMessage}"/>
         
-        <!-- Indicateur de chargement -->
+        <!-- Indicateur de chargement global (visible seulement au début) -->
         <ProgressBar IsIndeterminate="True"
                      IsVisible="{Binding IsLoading}"
                      HorizontalAlignment="Center"
@@ -196,11 +196,20 @@
         </StackPanel>
         
         <!-- Section des mangas tendances -->
-        <StackPanel IsVisible="{Binding !ShowSearchResults}">
+        <StackPanel IsVisible="{Binding !ShowSearchResults}" Spacing="5">
           <TextBlock Text="{Binding TrendingMangasTitle}" 
                      Classes="sectionTitle"/>
-          
-          <ItemsControl ItemsSource="{Binding TrendingMangas}">
+                     
+          <!-- Indicateur de chargement pour les tendances -->
+          <ProgressBar IsIndeterminate="True"
+                       IsVisible="{Binding IsTrendingLoading}"
+                       HorizontalAlignment="Center"
+                       Width="200"
+                       Margin="0,10"/>
+                       
+          <!-- Contenu des tendances -->
+          <ItemsControl ItemsSource="{Binding TrendingMangas}"
+                        IsVisible="{Binding HasTrendingData}">
             <ItemsControl.ItemsPanel>
               <ItemsPanelTemplate>
                 <WrapPanel HorizontalAlignment="Center"/>
@@ -255,11 +264,20 @@
         </StackPanel>
         
         <!-- Section des mangas populaires -->
-        <StackPanel IsVisible="{Binding !ShowSearchResults}">
+        <StackPanel IsVisible="{Binding !ShowSearchResults}" Spacing="5">
           <TextBlock Text="{Binding PopularMangasTitle}" 
                      Classes="sectionTitle"/>
-          
-          <ItemsControl ItemsSource="{Binding PopularMangas}">
+                     
+          <!-- Indicateur de chargement pour les populaires -->
+          <ProgressBar IsIndeterminate="True"
+                       IsVisible="{Binding IsPopularLoading}"
+                       HorizontalAlignment="Center"
+                       Width="200"
+                       Margin="0,10"/>
+                       
+          <!-- Contenu des populaires -->
+          <ItemsControl ItemsSource="{Binding PopularMangas}"
+                        IsVisible="{Binding HasPopularData}">
             <ItemsControl.ItemsPanel>
               <ItemsPanelTemplate>
                 <WrapPanel HorizontalAlignment="Center"/>
@@ -314,11 +332,20 @@
         </StackPanel>
         
         <!-- Section des mangas recommandés -->
-        <StackPanel IsVisible="{Binding !ShowSearchResults}">
+        <StackPanel IsVisible="{Binding !ShowSearchResults}" Spacing="5">
           <TextBlock Text="{Binding RecommendedMangasTitle}" 
                      Classes="sectionTitle"/>
-          
-          <ItemsControl ItemsSource="{Binding RecommendedMangas}">
+                     
+          <!-- Indicateur de chargement pour les recommandés -->
+          <ProgressBar IsIndeterminate="True"
+                       IsVisible="{Binding IsRecommendedLoading}"
+                       HorizontalAlignment="Center"
+                       Width="200"
+                       Margin="0,10"/>
+                       
+          <!-- Contenu des recommandés -->
+          <ItemsControl ItemsSource="{Binding RecommendedMangas}"
+                        IsVisible="{Binding HasRecommendedData}">
             <ItemsControl.ItemsPanel>
               <ItemsPanelTemplate>
                 <WrapPanel HorizontalAlignment="Center"/>

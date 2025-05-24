@@ -167,7 +167,7 @@ namespace SushiScan.ViewModels
             try
             {
                 Console.WriteLine($"[DEBUG] ChapterReaderViewModel: Début du chargement du chapitre {mangaTitle}, {scanName}, {chapterNumber}");
-                var chapterDetail = await _apiService.GetChapterDetailAsync(mangaTitle, scanName, chapterNumber);
+                var chapterDetail = await _apiService.GetChapterPagesAsync(mangaTitle, scanName, chapterNumber);
                 
                 if (chapterDetail != null)
                 {

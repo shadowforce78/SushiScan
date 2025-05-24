@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -116,6 +117,41 @@ namespace SushiScan.Services
                 return null;
             }
         }
+        
+        // Méthode pour obtenir l'image de couverture d'un manga (avec cache)
+        private async Task<Bitmap?> GetMangaCoverAsync(string mangaTitle)
+        {
+            try
+            {
+                // 1. Vérifier si l'image est en cache
+                Bitmap? coverImage = _cacheService.LoadCoverFromCache(mangaTitle);
+                if (coverImage != null)
+                {
+                    Console.WriteLine($"Couverture chargée depuis le cache pour: {mangaTitle}");
+                    return coverImage;
+                }
+                
+                // 2. Si non, télécharger l'image
+                string slug = GenerateSlug(mangaTitle);
+                string imageUrl = $"{ImageBaseUrl}{slug}.jpg";
+                
+                coverImage = await DownloadImageAsync(imageUrl);
+                
+                // 3. Si le téléchargement a réussi, mettre en cache
+                if (coverImage != null)
+                {
+                    await _cacheService.SaveCoverToCacheAsync(mangaTitle, coverImage);
+                    Console.WriteLine($"Couverture téléchargée et mise en cache pour: {mangaTitle}");
+                }
+                
+                return coverImage;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur lors de la récupération de la couverture: {ex.Message}");
+                return null;
+            }
+        }
 
         public async Task<HomePageData?> GetHomePageDataAsync()
         {
@@ -144,13 +180,13 @@ namespace SushiScan.Services
                 {
                     Console.WriteLine($"Données récupérées: Trending: {homePageData.Trending.Count}, Popular: {homePageData.Popular.Count}, Recommended: {homePageData.Recommended.Count}");
                     
-                    // Générer les URL d'images et télécharger les images pour chaque manga
+                    // Générer les URL d'images et charger les images pour chaque manga
                     foreach (var manga in homePageData.Trending)
                     {
                         string slug = GenerateSlug(manga.Name);
                         string imageUrl = $"{ImageBaseUrl}{slug}.jpg";
                         manga.ImagePath = imageUrl;
-                        manga.Image = await DownloadImageAsync(imageUrl);
+                        manga.Image = await GetMangaCoverAsync(manga.Name);
                         Console.WriteLine($"Manga trending: {manga.Name}, URL image: {imageUrl}");
                     }
                     
@@ -159,7 +195,7 @@ namespace SushiScan.Services
                         string slug = GenerateSlug(manga.Name);
                         string imageUrl = $"{ImageBaseUrl}{slug}.jpg";
                         manga.ImagePath = imageUrl;
-                        manga.Image = await DownloadImageAsync(imageUrl);
+                        manga.Image = await GetMangaCoverAsync(manga.Name);
                         Console.WriteLine($"Manga popular: {manga.Name}, URL image: {imageUrl}");
                     }
                     
@@ -168,7 +204,7 @@ namespace SushiScan.Services
                         string slug = GenerateSlug(manga.Name);
                         string imageUrl = $"{ImageBaseUrl}{slug}.jpg";
                         manga.ImagePath = imageUrl;
-                        manga.Image = await DownloadImageAsync(imageUrl);
+                        manga.Image = await GetMangaCoverAsync(manga.Name);
                         Console.WriteLine($"Manga recommended: {manga.Name}, URL image: {imageUrl}");
                     }
                 }
@@ -249,86 +285,60 @@ namespace SushiScan.Services
                     }
                     catch
                     {
-                        // Peut-être un wrapper avec une propriété contenant les résultats
-                        try 
-                        {
-                            var responseObject = JsonDocument.Parse(content);
-                            searchResults = new List<MangaSearchResult>();
-                            
-                            foreach (var property in responseObject.RootElement.EnumerateObject())
-                            {
-                                Console.WriteLine($"Propriété trouvée dans la réponse: {property.Name}");
-                                if (property.Value.ValueKind == JsonValueKind.Array)
-                                {
-                                    // Extraire le tableau de cette propriété
-                                    var arrayJson = property.Value.GetRawText();
-                                    var results = JsonSerializer.Deserialize<List<MangaSearchResult>>(arrayJson, options);
-                                    if (results != null)
-                                    {
-                                        searchResults.AddRange(results);
-                                    }
-                                    Console.WriteLine($"Résultats extraits de la propriété '{property.Name}'");
-                                }
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine($"Erreur lors de l'analyse du JSON: {ex.Message}");
-                            return new List<MangaSearchResult>();
-                        }
+                        // Si cela échoue, ce pourrait être un objet wrapper
+                        // Note: Cette partie devrait être adaptée à la structure réelle de l'API
+                        Console.WriteLine("Échec de la désérialisation comme objet unique, tentative comme objet wrapper");
+                        searchResults = new List<MangaSearchResult>();
                     }
                 }
                 else
                 {
-                    Console.WriteLine("Format JSON non reconnu");
-                    return new List<MangaSearchResult>();
+                    Console.WriteLine("Format de réponse non reconnu");
+                    searchResults = new List<MangaSearchResult>();
                 }
-                
-                Console.WriteLine($"Résultats trouvés: {searchResults.Count}");
                 
                 // Télécharger les images pour chaque résultat
                 foreach (var result in searchResults)
                 {
                     if (!string.IsNullOrEmpty(result.ImageUrl))
                     {
-                        result.Image = await DownloadImageAsync(result.ImageUrl);
-                    }
-                    else
-                    {
-                        // Si pas d'URL d'image fournie, générer une URL basée sur le titre
-                        string slug = GenerateSlug(result.Title);
-                        string imageUrl = $"{ImageBaseUrl}{slug}.jpg";
-                        result.ImageUrl = imageUrl;
-                        result.Image = await DownloadImageAsync(imageUrl);
+                        // Si l'URL est relative, la convertir en absolue
+                        if (!result.ImageUrl.StartsWith("http"))
+                        {
+                            result.ImageUrl = $"{ImageBaseUrl}{result.ImageUrl}";
+                        }
+                        
+                        // Utiliser le cache pour la couverture
+                        result.Image = await GetMangaCoverAsync(result.Title);
                     }
                 }
                 
+                Console.WriteLine($"Résultats de recherche: {searchResults.Count}");
                 return searchResults;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"ERREUR recherche: {ex.GetType().Name} - {ex.Message}");
-                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                Console.WriteLine($"Erreur lors de la recherche: {ex.Message}");
                 return new List<MangaSearchResult>();
             }
         }
 
-        // Méthode pour récupérer les détails d'un manga
-        public async Task<MangaDetail?> GetMangaDetailAsync(string title)
+        // Méthode pour récupérer les détails d'un manga à partir de son ID
+        public async Task<MangaDetail?> GetMangaDetailAsync(string mangaName)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(title))
+                if (string.IsNullOrWhiteSpace(mangaName))
                 {
-                    Console.WriteLine("Titre du manga non fourni pour les détails");
                     return null;
                 }
                 
-                // Convertir le titre pour l'URL
-                string encodedTitle = Uri.EscapeDataString(title);
-                string url = $"/scans/manga/{encodedTitle}";
+                Console.WriteLine($"Récupération des détails du manga: {mangaName}");
                 
-                Console.WriteLine($"Récupération des détails du manga: {title}");
+                // Générer le slug pour l'URL
+                string slug = GenerateSlug(mangaName);
+                string url = $"/scans/manga/{slug}";
+                
                 Console.WriteLine($"URL de l'API: {BaseUrl}{url}");
                 
                 var response = await _httpClient.GetAsync(url);
@@ -341,170 +351,305 @@ namespace SushiScan.Services
                 }
                 
                 var content = await response.Content.ReadAsStringAsync();
-                
-                // Affichage du contenu pour le débogage (limité à 500 caractères)
-                Console.WriteLine($"Contenu de la réponse: {content.Substring(0, Math.Min(500, content.Length))}...");
+                Console.WriteLine($"Contenu de la réponse (50 premiers caractères): {content.Substring(0, Math.Min(50, content.Length))}...");
                 
                 var options = new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
                 };
                 
-                // Désérialiser la réponse
                 var mangaDetail = JsonSerializer.Deserialize<MangaDetail>(content, options);
                 
-                if (mangaDetail == null)
+                if (mangaDetail != null)
                 {
-                    Console.WriteLine("La désérialisation des détails du manga a renvoyé null");
-                    return null;
-                }
-                
-                // Télécharger l'image du manga si une URL est fournie
-                if (!string.IsNullOrEmpty(mangaDetail.ImageUrl))
-                {
-                    mangaDetail.Image = await DownloadImageAsync(mangaDetail.ImageUrl);
+                    // Télécharger l'image du manga
+                    if (!string.IsNullOrEmpty(mangaDetail.ImageUrl))
+                    {
+                        string imageUrl = mangaDetail.ImageUrl;
+                        
+                        // Si l'URL est relative, la convertir en absolue
+                        if (!imageUrl.StartsWith("http"))
+                        {
+                            imageUrl = $"{ImageBaseUrl}{imageUrl}";
+                        }
+                        
+                        mangaDetail.ImageUrl = imageUrl;
+                        
+                        // Utiliser le cache pour la couverture
+                        mangaDetail.Image = await GetMangaCoverAsync(mangaDetail.Title);
+                    }
+                    
+                    Console.WriteLine($"Détails du manga récupérés: {mangaDetail.Title}");
                 }
                 else
                 {
-                    // Si pas d'URL d'image fournie, générer une URL basée sur le titre
-                    string slug = GenerateSlug(mangaDetail.Title);
-                    string imageUrl = $"{ImageBaseUrl}{slug}.jpg";
-                    mangaDetail.ImageUrl = imageUrl;
-                    mangaDetail.Image = await DownloadImageAsync(imageUrl);
+                    Console.WriteLine("La désérialisation a renvoyé null");
                 }
                 
-                Console.WriteLine($"Détails du manga récupérés avec succès: {mangaDetail.Title}");
                 return mangaDetail;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"ERREUR lors de la récupération des détails du manga: {ex.GetType().Name} - {ex.Message}");
-                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                Console.WriteLine($"Erreur lors de la récupération des détails: {ex.Message}");
                 return null;
             }
         }
 
-        // Méthode pour récupérer les détails d'un chapitre
-        public async Task<ChapterDetail?> GetChapterDetailAsync(string mangaTitle, string scanName, string chapterNumber, IProgress<(int index, Bitmap? page)>? progressCallback = null)
+        // Méthode pour récupérer les pages d'un chapitre
+        public async Task<ChapterDetail?> GetChapterPagesAsync(
+            string mangaTitle, 
+            string scanName, 
+            string chapterNumber,
+            IProgress<(int index, Bitmap? page)>? progressCallback = null)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(mangaTitle) || string.IsNullOrWhiteSpace(scanName) || string.IsNullOrWhiteSpace(chapterNumber))
-                {
-                    Console.WriteLine("Informations manquantes pour récupérer les détails du chapitre.");
-                    return null;
-                }
-
-                Console.WriteLine($"Vérification du cache pour le chapitre: {mangaTitle} - {scanName} - Chapitre {chapterNumber}");
+                Console.WriteLine($"Récupération des pages pour {mangaTitle} - {scanName} #{chapterNumber}");
                 
-                // Vérifier d'abord si le chapitre est déjà en cache
+                // Vérifier d'abord si le chapitre est en cache
                 if (_cacheService.IsChapterCached(mangaTitle, scanName, chapterNumber))
                 {
-                    Console.WriteLine("Chapitre trouvé en cache, chargement depuis le cache...");
-                    var cachedChapter = await _cacheService.LoadChapterFromCacheAsync(mangaTitle, scanName, chapterNumber, progressCallback);
+                    Console.WriteLine("Chapitre trouvé en cache, chargement...");
+                    var cachedChapter = await _cacheService.LoadChapterFromCacheAsync(
+                        mangaTitle, 
+                        scanName, 
+                        chapterNumber, 
+                        progressCallback);
                     
-                    if (cachedChapter != null && cachedChapter.Pages.Count > 0)
+                    if (cachedChapter != null)
                     {
-                        Console.WriteLine($"Chapitre chargé depuis le cache avec succès: {cachedChapter.Pages.Count} pages");
+                        Console.WriteLine("Chapitre chargé depuis le cache avec succès");
                         return cachedChapter;
                     }
-                    else
-                    {
-                        Console.WriteLine("Le cache semble corrompu, téléchargement du chapitre depuis l'API...");
-                    }
+                    
+                    Console.WriteLine("Échec du chargement depuis le cache, récupération depuis l'API...");
+                }
+
+                // Générer le slug pour l'URL
+                string mangaSlug = GenerateSlug(mangaTitle);
+                
+                // Vérifier si scanName est déjà "scans" et éviter la duplication
+                string scan = scanName.ToLower();
+                if (scan == "scans")
+                {
+                    scan = "";
+                }
+                
+                // Liste des formats d'URL à essayer
+                var urlFormats = new List<string>();
+                
+                // Format original
+                if (string.IsNullOrEmpty(scan))
+                {
+                    urlFormats.Add($"/scans/manga/{mangaSlug}/chapter/{chapterNumber}");
                 }
                 else
                 {
-                    Console.WriteLine("Chapitre non trouvé en cache, téléchargement depuis l'API...");
+                    urlFormats.Add($"/scans/manga/{mangaSlug}/chapter/{chapterNumber}/{scan}");
                 }
-
-                // Si le chapitre n'est pas en cache ou si le cache est corrompu, télécharger depuis l'API
+                
+                // Formats alternatifs
+                urlFormats.Add($"/scans/manga/{mangaSlug}/chapter/{chapterNumber}/scan");
+                urlFormats.Add($"/scans/manga/{mangaSlug}/chapters/{chapterNumber}");
+                urlFormats.Add($"/scans/manga/{mangaSlug}/{chapterNumber}");
+                
+                // Format avec paramètres de requête (nouvel endpoint documenté)
                 string encodedTitle = Uri.EscapeDataString(mangaTitle);
-                string encodedScanName = Uri.EscapeDataString(scanName);
-                string encodedChapterNumber = Uri.EscapeDataString(chapterNumber);
+                string encodedScan = Uri.EscapeDataString(scanName);
+                string encodedChapter = Uri.EscapeDataString(chapterNumber);
+                urlFormats.Add($"/scans/chapter?title={encodedTitle}&scan_name={encodedScan}&chapter_number={encodedChapter}");
                 
-                string url = $"/scans/chapter?title={encodedTitle}&scan_name={encodedScanName}&chapter_number={encodedChapterNumber}";
+                // Tester chaque format d'URL jusqu'à ce qu'une réponse réussisse
+                HttpResponseMessage? successResponse = null;
+                string usedUrl = "";
                 
-                Console.WriteLine($"URL de l'API: {BaseUrl}{url}");
-
-                var response = await _httpClient.GetAsync(url);
-                Console.WriteLine($"Statut de la réponse: {response.StatusCode}");
-
-                if (!response.IsSuccessStatusCode)
+                foreach (var url in urlFormats)
                 {
-                    Console.WriteLine($"Échec de la récupération des détails du chapitre: {response.StatusCode}");
+                    Console.WriteLine($"Tentative d'URL: {BaseUrl}{url}");
+                    
+                    var response = await _httpClient.GetAsync(url);
+                    Console.WriteLine($"Statut de la réponse: {response.StatusCode}");
+                    
+                    if (response.IsSuccessStatusCode)
+                    {
+                        successResponse = response;
+                        usedUrl = url;
+                        Console.WriteLine($"URL fonctionnelle trouvée: {BaseUrl}{url}");
+                        break;
+                    }
+                }
+                
+                if (successResponse == null)
+                {
+                    Console.WriteLine("Toutes les tentatives d'URL ont échoué");
                     return null;
                 }
-
-                var content = await response.Content.ReadAsStringAsync();
-                Console.WriteLine($"Contenu de la réponse (chapitre): {content.Substring(0, Math.Min(500, content.Length))}...");
-
+                
+                var content = await successResponse.Content.ReadAsStringAsync();
+                Console.WriteLine($"Contenu de la réponse reçu: {content.Length} caractères");
+                if (content.Length < 100) 
+                {
+                    Console.WriteLine($"Contenu reçu (peut aider au débogage): {content}");
+                }
+                
                 var options = new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
                 };
-
-                var chapterDetail = JsonSerializer.Deserialize<ChapterDetail>(content, options);
-
-                if (chapterDetail == null)
+                
+                ChapterDetail? chapterDetail = null;
+                
+                try 
                 {
-                    Console.WriteLine("La désérialisation des détails du chapitre a renvoyé null.");
-                    return null;
+                    chapterDetail = JsonSerializer.Deserialize<ChapterDetail>(content, options);
                 }
-
-                // Télécharger les images des pages
-                if (chapterDetail.ImageUrls != null && chapterDetail.ImageUrls.Count > 0)
+                catch (JsonException jsonEx) 
                 {
-                    Console.WriteLine($"Téléchargement de {chapterDetail.ImageUrls.Count} pages pour le chapitre...");
+                    Console.WriteLine($"Erreur de désérialisation JSON: {jsonEx.Message}");
+                    Console.WriteLine("Tentative de traitement manuel du JSON...");
                     
-                    // Pré-remplir avec des pages nulles pour conserver l'ordre
-                    for (int i = 0; i < chapterDetail.ImageUrls.Count; i++)
+                    // Tentative de parsing manuel si la structure ne correspond pas exactement
+                    try 
                     {
-                        chapterDetail.Pages.Add(null);
-                    }
-                    
-                    // Téléchargement asynchrone des images avec notification de progression
-                    var downloadTasks = new List<Task>();
-                    
-                    for (int i = 0; i < chapterDetail.ImageUrls.Count; i++)
-                    {
-                        int pageIndex = i; // Capture de la variable pour éviter les problèmes de closure
-                        string imageUrl = chapterDetail.ImageUrls[i];
+                        var jsonDoc = JsonDocument.Parse(content);
+                        var root = jsonDoc.RootElement;
                         
-                        var task = Task.Run(async () =>
+                        chapterDetail = new ChapterDetail 
                         {
-                            var imageBitmap = await DownloadImageAsync(imageUrl);
-                            chapterDetail.Pages[pageIndex] = imageBitmap;
-                            
-                            // Notifier la progression
-                            progressCallback?.Report((pageIndex, imageBitmap));
-                        });
+                            MangaTitle = mangaTitle,
+                            ScanName = scanName,
+                            Number = chapterNumber,
+                            ImageUrls = new List<string>(),
+                            Pages = new List<Bitmap?>()
+                        };
                         
-                        downloadTasks.Add(task);
+                        // Essayer de trouver les URLs d'images dans différentes structures possibles
+                        if (root.TryGetProperty("pages", out var pagesElement) && pagesElement.ValueKind == JsonValueKind.Array)
+                        {
+                            foreach (var page in pagesElement.EnumerateArray())
+                            {
+                                if (page.ValueKind == JsonValueKind.String)
+                                {
+                                    chapterDetail.ImageUrls.Add(page.GetString() ?? "");
+                                }
+                                else if (page.TryGetProperty("url", out var urlProperty) && urlProperty.ValueKind == JsonValueKind.String)
+                                {
+                                    chapterDetail.ImageUrls.Add(urlProperty.GetString() ?? "");
+                                }
+                            }
+                        }
+                        else if (root.TryGetProperty("images", out var imagesElement) && imagesElement.ValueKind == JsonValueKind.Array)
+                        {
+                            foreach (var image in imagesElement.EnumerateArray())
+                            {
+                                if (image.ValueKind == JsonValueKind.String)
+                                {
+                                    chapterDetail.ImageUrls.Add(image.GetString() ?? "");
+                                }
+                                else if (image.TryGetProperty("url", out var urlProperty) && urlProperty.ValueKind == JsonValueKind.String)
+                                {
+                                    chapterDetail.ImageUrls.Add(urlProperty.GetString() ?? "");
+                                }
+                            }
+                        }
+                        
+                        chapterDetail.PageCount = chapterDetail.ImageUrls.Count;
+                        Console.WriteLine($"Parsing manuel: {chapterDetail.PageCount} URLs d'images extraites");
+                    }
+                    catch (Exception parseEx)
+                    {
+                        Console.WriteLine($"Échec du parsing manuel: {parseEx.Message}");
+                    }
+                }
+                
+                if (chapterDetail != null)
+                {
+                    // Compléter les informations du chapitre
+                    chapterDetail.MangaTitle = mangaTitle;
+                    chapterDetail.ScanName = scanName;
+                    chapterDetail.Number = chapterNumber;
+                    chapterDetail.PageCount = chapterDetail.ImageUrls?.Count ?? 0;
+                    
+                    if (chapterDetail.Pages == null)
+                    {
+                        chapterDetail.Pages = new List<Bitmap?>();
                     }
                     
-                    // Attendre que toutes les images soient téléchargées
-                    await Task.WhenAll(downloadTasks);
+                    Console.WriteLine($"Chapitre désérialisé avec {chapterDetail.PageCount} pages");
                     
-                    Console.WriteLine("Toutes les pages du chapitre ont été téléchargées.");
-                    
-                    // Sauvegarder le chapitre dans le cache pour les prochaines consultations
-                    await _cacheService.SaveChapterToCacheAsync(chapterDetail);
+                    // Télécharger chaque page
+                    if (chapterDetail.ImageUrls != null && chapterDetail.ImageUrls.Count > 0)
+                    {
+                        for (int i = 0; i < chapterDetail.ImageUrls.Count; i++)
+                        {
+                            var imageUrl = chapterDetail.ImageUrls[i];
+                            
+                            // Ignorer les URLs vides
+                            if (string.IsNullOrWhiteSpace(imageUrl))
+                            {
+                                Console.WriteLine($"URL de la page {i+1} est vide, ignorée");
+                                chapterDetail.Pages.Add(null);
+                                continue;
+                            }
+                            
+                            // S'assurer que l'URL est absolue
+                            if (!Uri.IsWellFormedUriString(imageUrl, UriKind.Absolute))
+                            {
+                                if (imageUrl.StartsWith("//"))
+                                {
+                                    imageUrl = $"https:{imageUrl}";
+                                }
+                                else if (imageUrl.StartsWith("/"))
+                                {
+                                    imageUrl = $"{BaseUrl}{imageUrl}";
+                                }
+                                else 
+                                {
+                                    imageUrl = $"https://{imageUrl}";
+                                }
+                                chapterDetail.ImageUrls[i] = imageUrl;
+                            }
+                            
+                            Console.WriteLine($"Téléchargement de la page {i+1}/{chapterDetail.PageCount}: {imageUrl}");
+                            
+                            var pageBitmap = await DownloadImageAsync(imageUrl);
+                            chapterDetail.Pages.Add(pageBitmap);
+                            
+                            // Notifier de la progression
+                            progressCallback?.Report((i, pageBitmap));
+                        }
+                        
+                        Console.WriteLine("Toutes les pages ont été téléchargées");
+                        
+                        // Mise en cache du chapitre seulement si des pages ont été téléchargées avec succès
+                        if (chapterDetail.Pages.Any(p => p != null))
+                        {
+                            await _cacheService.SaveChapterToCacheAsync(chapterDetail);
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Aucune URL d'image trouvée dans la réponse");
+                    }
                 }
                 else
                 {
-                    Console.WriteLine("Aucune URL d'image trouvée pour les pages du chapitre.");
+                    Console.WriteLine("La désérialisation a renvoyé null");
                 }
                 
-                Console.WriteLine($"Détails du chapitre récupérés : {chapterDetail.MangaTitle} - Chapitre {chapterDetail.Number}");
                 return chapterDetail;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"ERREUR lors de la récupération des détails du chapitre: {ex.GetType().Name} - {ex.Message}");
+                Console.WriteLine($"Erreur lors de la récupération des pages: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Exception interne: {ex.InnerException.Message}");
+                }
                 Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 return null;
             }
         }
     }
 }
+
