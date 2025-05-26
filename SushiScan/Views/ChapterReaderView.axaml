@@ -1,9 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:SushiScan.ViewModels"
-             xmlns:conv="using:Avalonia.Data.Converters"
-             xmlns:paz="using:Avalonia.Controls.PanAndZoom"
-             xmlns:localconv="using:SushiScan.Converters"
+             xmlns:conv="using:SushiScan.Converters"
              x:Class="SushiScan.Views.ChapterReaderView"
              x:DataType="vm:ChapterReaderViewModel">
   
@@ -58,7 +56,7 @@
         </StackPanel>
       </Border>
 
-      <!-- Images viewer - affiche toutes les pages -->
+      <!-- Images viewer - affiche toutes les pages verticalement -->
       <ScrollViewer Grid.Row="0" 
                    x:Name="PageScrollViewer"
                    Background="#1E1E1E"
@@ -107,6 +105,16 @@
             <TextBlock Text="Chapitre précédent"/>
           </StackPanel>
         </Button>
+
+        <!-- Info chapitre au centre -->
+        <StackPanel Grid.Column="1" 
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+          <TextBlock Text="{Binding PageCount, StringFormat='Pages: {0}'}" 
+                     HorizontalAlignment="Center" 
+                     Foreground="#CCCCCC"
+                     FontSize="12"/>
+        </StackPanel>
 
         <!-- Bouton chapitre suivant -->
         <Button Grid.Column="2" 

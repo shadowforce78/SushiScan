@@ -51,13 +51,17 @@ namespace SushiScan.ViewModels
                     _currentPageIndex = value;
                     OnPropertyChanged();
                     OnPropertyChanged(nameof(PageInfo));
+                    OnPropertyChanged(nameof(CurrentPageImage));
                 }
             }
         }
 
         public int PageCount => CurrentChapter?.Pages.Count ?? 0;
-        public string PageInfo => PageCount > 0 ? $"{PageCount} pages" : "";
+        public string PageInfo => PageCount > 0 ? $"Page {CurrentPageIndex + 1} sur {PageCount}" : "";
         public string ChapterDisplayTitle => CurrentChapter != null ? $"{CurrentChapter.MangaTitle} - Chapitre {CurrentChapter.Number}" : "Chargement...";
+        
+        // Propriété pour l'image de la page actuelle
+        public Bitmap? CurrentPageImage => CurrentChapter?.Pages.ElementAtOrDefault(CurrentPageIndex);
         
         public string MangaTitle
         {
@@ -126,12 +130,16 @@ namespace SushiScan.ViewModels
 
         public ICommand NextChapterCommand { get; }
         public ICommand PreviousChapterCommand { get; }
+        public ICommand NextPageCommand { get; }
+        public ICommand PreviousPageCommand { get; }
 
         public ChapterReaderViewModel()
         {
             _apiService = new ApiService();
             NextChapterCommand = new RelayCommand(_ => LoadNextChapter(), _ => CanLoadNextChapter());
             PreviousChapterCommand = new RelayCommand(_ => LoadPreviousChapter(), _ => CanLoadPreviousChapter());
+            NextPageCommand = new RelayCommand(_ => LoadNextPage(), _ => CanLoadNextPage());
+            PreviousPageCommand = new RelayCommand(_ => LoadPreviousPage(), _ => CanLoadPreviousPage());
         }
         
         private void LoadAllPages()
@@ -234,6 +242,25 @@ namespace SushiScan.ViewModels
             {
                 int prevChapter = ChapterNumber - 1;
                 await LoadChapterAsync(MangaTitle, ScanName, prevChapter.ToString());
+            }
+        }
+
+        // Navigation entre les pages
+        private bool CanLoadNextPage() => !IsLoading && CurrentPageIndex < PageCount - 1;
+        private void LoadNextPage()
+        {
+            if (CanLoadNextPage())
+            {
+                CurrentPageIndex++;
+            }
+        }
+        
+        private bool CanLoadPreviousPage() => !IsLoading && CurrentPageIndex > 0;
+        private void LoadPreviousPage()
+        {
+            if (CanLoadPreviousPage())
+            {
+                CurrentPageIndex--;
             }
         }
     }

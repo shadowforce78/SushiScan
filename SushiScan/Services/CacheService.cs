@@ -255,8 +255,7 @@ namespace SushiScan.Services
             
             return File.Exists(coverPath);
         }
-        
-        /// <summary>
+          /// <summary>
         /// Sauvegarde une couverture de manga dans le cache
         /// </summary>
         public async Task SaveCoverToCacheAsync(string mangaTitle, Bitmap cover)
@@ -267,7 +266,7 @@ namespace SushiScan.Services
                 string coverPath = Path.Combine(_coverCacheDirectory, $"{coverKey}.jpg");
                 
                 using var fileStream = File.Create(coverPath);
-                cover.Save(fileStream);
+                await Task.Run(() => cover.Save(fileStream));
                 
                 Console.WriteLine($"Couverture mise en cache avec succès: {coverPath}");
             }

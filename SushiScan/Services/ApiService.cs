@@ -8,6 +8,8 @@ using System.Text.RegularExpressions;
 using System.IO;
 using Avalonia.Media.Imaging;
 using SushiScan.Models;
+using System.Threading;
+using System.Net;
 
 namespace SushiScan.Services
 {
@@ -20,7 +22,13 @@ namespace SushiScan.Services
 
         public ApiService()
         {
-            _httpClient = new HttpClient
+            var handler = new HttpClientHandler
+            {
+                UseCookies = true,
+                CookieContainer = new CookieContainer(),
+                AllowAutoRedirect = true // S'assurer que les redirections sont suivies
+            };
+            _httpClient = new HttpClient(handler)
             {
                 BaseAddress = new Uri(BaseUrl)
             };
@@ -52,18 +60,93 @@ namespace SushiScan.Services
         private async Task<Bitmap?> DownloadImageAsync(string imageUrl)
         {
             try
-            {
-                Console.WriteLine($"Téléchargement de l'image: {imageUrl}");
+            {                string effectiveImageUrl = imageUrl;                // Vérifier si c'est une URL Google Drive et la transformer pour téléchargement direct
+                if (imageUrl.Contains("drive.google.com"))
+                {
+                    string? fileId = null;
+                    
+                    // Extraire l'ID selon différents formats d'URL Google Drive
+                    if (imageUrl.Contains("uc?export=view&id=") || imageUrl.Contains("uc?export=download&id="))
+                    {
+                        var match = Regex.Match(imageUrl, @"[?&]id=([^&]+)");
+                        if (match.Success)
+                        {
+                            fileId = match.Groups[1].Value;
+                        }
+                    }
+                    else if (imageUrl.Contains("drive.google.com/file/d/"))
+                    {
+                        var match = Regex.Match(imageUrl, @"drive\.google\.com/file/d/([^/]+)/");
+                        if (match.Success)
+                        {
+                            fileId = match.Groups[1].Value;
+                        }
+                    }
+                    else if (imageUrl.Contains("drive.google.com/open?id="))
+                    {
+                        var match = Regex.Match(imageUrl, @"[?&]id=([^&]+)");
+                        if (match.Success)
+                        {
+                            fileId = match.Groups[1].Value;
+                        }
+                    }
+                    
+                    if (!string.IsNullOrEmpty(fileId))
+                    {
+                        // Essayer plusieurs méthodes Google Drive pour télécharger l'image
+                        var googleDriveUrls = new[]
+                        {
+                            $"https://drive.google.com/uc?export=download&id={fileId}&confirm=t",
+                            $"https://drive.google.com/thumbnail?id={fileId}&sz=w2000",
+                            $"https://lh3.googleusercontent.com/d/{fileId}=w2000",
+                            $"https://drive.google.com/uc?id={fileId}&export=download&authuser=0&confirm=t&uuid={Guid.NewGuid()}"
+                        };
+                        
+                        Console.WriteLine($"ID Google Drive extrait: {fileId}");
+                        Console.WriteLine($"URL originale: {imageUrl}");
+                        
+                        // Essayer chaque URL jusqu'à ce qu'une fonctionne
+                        foreach (var testUrl in googleDriveUrls)
+                        {
+                            Console.WriteLine($"Test de l'URL Google Drive: {testUrl}");
+                            effectiveImageUrl = testUrl;
+                            
+                            try
+                            {
+                                var testRequest = new HttpRequestMessage(HttpMethod.Head, effectiveImageUrl);
+                                testRequest.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
+                                
+                                var testResponse = await _httpClient.SendAsync(testRequest);
+                                var testContentType = testResponse.Content.Headers.ContentType?.MediaType;
+                                
+                                Console.WriteLine($"Test URL - Status: {testResponse.StatusCode}, Content-Type: {testContentType}");
+                                
+                                if (testResponse.IsSuccessStatusCode && testContentType != null && testContentType.StartsWith("image/"))
+                                {
+                                    Console.WriteLine($"URL Google Drive fonctionnelle trouvée: {effectiveImageUrl}");
+                                    break;
+                                }
+                            }
+                            catch (Exception testEx)
+                            {
+                                Console.WriteLine($"Erreur lors du test de l'URL: {testEx.Message}");
+                                continue;
+                            }
+                        }
+                    }
+                }
+
+                Console.WriteLine($"Téléchargement de l'image: {effectiveImageUrl}");
                 
                 // S'assurer que l'URL est absolue
-                if (!Uri.IsWellFormedUriString(imageUrl, UriKind.Absolute))
+                if (!Uri.IsWellFormedUriString(effectiveImageUrl, UriKind.Absolute))
                 {
-                    Console.WriteLine($"URL d'image invalide: {imageUrl}");
+                    Console.WriteLine($"URL d'image invalide: {effectiveImageUrl}");
                     return null;
                 }
                 
                 // Créer une requête avec des en-têtes personnalisés
-                var request = new HttpRequestMessage(HttpMethod.Get, imageUrl);
+                var request = new HttpRequestMessage(HttpMethod.Get, effectiveImageUrl);
                 request.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
                 request.Headers.Add("Accept", "image/webp,image/apng,image/*,*/*;q=0.8");
                 request.Headers.Add("Accept-Language", "fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7");
@@ -180,33 +263,37 @@ namespace SushiScan.Services
                 {
                     Console.WriteLine($"Données récupérées: Trending: {homePageData.Trending.Count}, Popular: {homePageData.Popular.Count}, Recommended: {homePageData.Recommended.Count}");
                     
-                    // Générer les URL d'images et charger les images pour chaque manga
-                    foreach (var manga in homePageData.Trending)
+                    // Créer une liste de tâches pour charger toutes les couvertures
+                    var coverTasks = new List<Task>();
+
+                    // S'assurer que assignCoverAction est bien Func<Manga, Task>
+                    Func<Manga, Task> assignCoverAction = async (manga) =>
                     {
                         string slug = GenerateSlug(manga.Name);
                         string imageUrl = $"{ImageBaseUrl}{slug}.jpg";
                         manga.ImagePath = imageUrl;
-                        manga.Image = await GetMangaCoverAsync(manga.Name);
-                        Console.WriteLine($"Manga trending: {manga.Name}, URL image: {imageUrl}");
+                        manga.Image = await GetMangaCoverAsync(manga.Name); // Conserve l'appel existant qui gère le cache
+                        Console.WriteLine($"Manga (parallèle): {manga.Name}, URL image: {imageUrl}, Image chargée: {manga.Image != null}");
+                    };
+
+                    foreach (var manga in homePageData.Trending)
+                    {
+                        coverTasks.Add(assignCoverAction(manga));
                     }
                     
                     foreach (var manga in homePageData.Popular)
                     {
-                        string slug = GenerateSlug(manga.Name);
-                        string imageUrl = $"{ImageBaseUrl}{slug}.jpg";
-                        manga.ImagePath = imageUrl;
-                        manga.Image = await GetMangaCoverAsync(manga.Name);
-                        Console.WriteLine($"Manga popular: {manga.Name}, URL image: {imageUrl}");
+                        coverTasks.Add(assignCoverAction(manga));
                     }
                     
                     foreach (var manga in homePageData.Recommended)
                     {
-                        string slug = GenerateSlug(manga.Name);
-                        string imageUrl = $"{ImageBaseUrl}{slug}.jpg";
-                        manga.ImagePath = imageUrl;
-                        manga.Image = await GetMangaCoverAsync(manga.Name);
-                        Console.WriteLine($"Manga recommended: {manga.Name}, URL image: {imageUrl}");
+                        coverTasks.Add(assignCoverAction(manga));
                     }
+
+                    // Attendre que toutes les tâches de chargement de couverture soient terminées
+                    await Task.WhenAll(coverTasks);
+                    Console.WriteLine("Toutes les couvertures de la page d'accueil ont été traitées.");
                 }
                 else
                 {
@@ -298,22 +385,19 @@ namespace SushiScan.Services
                 }
                 
                 // Télécharger les images pour chaque résultat
+                var searchCoverTasks = new List<Task>();
                 foreach (var result in searchResults)
                 {
-                    if (!string.IsNullOrEmpty(result.ImageUrl))
+                    searchCoverTasks.Add(Task.Run(async () => 
                     {
-                        // Si l'URL est relative, la convertir en absolue
-                        if (!result.ImageUrl.StartsWith("http"))
-                        {
-                            result.ImageUrl = $"{ImageBaseUrl}{result.ImageUrl}";
-                        }
-                        
-                        // Utiliser le cache pour la couverture
+                        // Utiliser result.Title au lieu de result.Name
                         result.Image = await GetMangaCoverAsync(result.Title);
-                    }
+                        Console.WriteLine($"Couverture chargée pour le résultat de recherche: {result.Title}, Image: {(result.Image != null ? "chargée" : "non chargée")}");
+                    }));
                 }
+                await Task.WhenAll(searchCoverTasks);
+                Console.WriteLine("Toutes les couvertures des résultats de recherche ont été traitées.");
                 
-                Console.WriteLine($"Résultats de recherche: {searchResults.Count}");
                 return searchResults;
             }
             catch (Exception ex)
@@ -580,18 +664,28 @@ namespace SushiScan.Services
                     // Télécharger chaque page
                     if (chapterDetail.ImageUrls != null && chapterDetail.ImageUrls.Count > 0)
                     {
+                        // Utiliser un SemaphoreSlim pour limiter le nombre de téléchargements concurrents
+                        int maxConcurrentDownloads = 5; // Limite à 5 téléchargements simultanés
+                        // S'assurer que System.Threading est inclus pour SemaphoreSlim
+                        using var semaphore = new SemaphoreSlim(maxConcurrentDownloads);
+
+                        var downloadTasks = new List<Task>();
+                        var pageBitmaps = new Bitmap?[chapterDetail.ImageUrls.Count]; // Pour stocker les bitmaps dans l'ordre
+
                         for (int i = 0; i < chapterDetail.ImageUrls.Count; i++)
                         {
                             var imageUrl = chapterDetail.ImageUrls[i];
-                            
+                            int currentIndex = i; // Capturer l'index pour le lambda
+
                             // Ignorer les URLs vides
                             if (string.IsNullOrWhiteSpace(imageUrl))
                             {
-                                Console.WriteLine($"URL de la page {i+1} est vide, ignorée");
-                                chapterDetail.Pages.Add(null);
+                                Console.WriteLine($"URL de la page {currentIndex + 1} est vide, ignorée");
+                                pageBitmaps[currentIndex] = null;
+                                progressCallback?.Report((currentIndex, null));
                                 continue;
                             }
-                            
+
                             // S'assurer que l'URL est absolue
                             if (!Uri.IsWellFormedUriString(imageUrl, UriKind.Absolute))
                             {
@@ -601,23 +695,45 @@ namespace SushiScan.Services
                                 }
                                 else if (imageUrl.StartsWith("/"))
                                 {
-                                    imageUrl = $"{BaseUrl}{imageUrl}";
+                                    imageUrl = $"{BaseUrl}{imageUrl}"; // Assurez-vous que BaseUrl est correct ici
                                 }
                                 else 
                                 {
+                                    // Tenter de former une URL valide, cela peut nécessiter une logique plus robuste
+                                    // basée sur la source des URLs relatives.
+                                    // Pour l'instant, on suppose qu'elles peuvent être préfixées par https://
                                     imageUrl = $"https://{imageUrl}";
                                 }
-                                chapterDetail.ImageUrls[i] = imageUrl;
+                                chapterDetail.ImageUrls[currentIndex] = imageUrl; // Mettre à jour l'URL dans la liste si elle a été modifiée
                             }
                             
-                            Console.WriteLine($"Téléchargement de la page {i+1}/{chapterDetail.PageCount}: {imageUrl}");
-                            
-                            var pageBitmap = await DownloadImageAsync(imageUrl);
-                            chapterDetail.Pages.Add(pageBitmap);
-                            
-                            // Notifier de la progression
-                            progressCallback?.Report((i, pageBitmap));
+                            // Attendre qu'un slot soit disponible
+                            await semaphore.WaitAsync();
+
+                            downloadTasks.Add(Task.Run(async () =>
+                            {
+                                try
+                                {
+                                    Console.WriteLine($"Téléchargement de la page {currentIndex + 1}/{chapterDetail.ImageUrls.Count}: {imageUrl}");
+                                    var pageBitmap = await DownloadImageAsync(imageUrl);
+                                    pageBitmaps[currentIndex] = pageBitmap;
+                                    progressCallback?.Report((currentIndex, pageBitmap));
+                                }
+                                catch (Exception ex)
+                                {
+                                    Console.WriteLine($"Erreur lors du téléchargement de la page {currentIndex + 1}: {ex.Message}");
+                                    pageBitmaps[currentIndex] = null;
+                                    progressCallback?.Report((currentIndex, null));
+                                }
+                                finally
+                                {
+                                    semaphore.Release(); // Libérer le slot
+                                }
+                            }));
                         }
+                        
+                        await Task.WhenAll(downloadTasks);
+                        chapterDetail.Pages = pageBitmaps.ToList(); // Assigner les bitmaps dans le bon ordre
                         
                         Console.WriteLine("Toutes les pages ont été téléchargées");
                         
@@ -652,4 +768,3 @@ namespace SushiScan.Services
         }
     }
 }
-
