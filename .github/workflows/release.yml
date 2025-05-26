@@ -6,6 +6,10 @@ on:
       - 'V*'  # Déclenché uniquement sur les tags de version (ex: v1.0.0)
   workflow_dispatch:  # Permet de déclencher manuellement
 
+permissions:
+  contents: write  # Nécessaire pour créer des releases et uploader des artefacts
+  id-token: write  # Nécessaire pour l'authentification avec GitHub Actions
+
 env:
   DOTNET_VERSION: '9.0'
   JAVA_VERSION: '21'
