@@ -658,12 +658,18 @@ namespace SushiScan.Services
                     {
                         chapterDetail.Pages = new List<Bitmap?>();
                     }
-                    
-                    Console.WriteLine($"Chapitre désérialisé avec {chapterDetail.PageCount} pages");
+                      Console.WriteLine($"Chapitre désérialisé avec {chapterDetail.PageCount} pages");
                     
                     // Télécharger chaque page
                     if (chapterDetail.ImageUrls != null && chapterDetail.ImageUrls.Count > 0)
                     {
+                        // Initialiser immédiatement les placeholders pour toutes les pages
+                        Console.WriteLine($"Initialisation de {chapterDetail.ImageUrls.Count} placeholders");
+                        for (int i = 0; i < chapterDetail.ImageUrls.Count; i++)
+                        {
+                            progressCallback?.Report((i, null));
+                        }
+                        
                         // Utiliser un SemaphoreSlim pour limiter le nombre de téléchargements concurrents
                         int maxConcurrentDownloads = 5; // Limite à 5 téléchargements simultanés
                         // S'assurer que System.Threading est inclus pour SemaphoreSlim

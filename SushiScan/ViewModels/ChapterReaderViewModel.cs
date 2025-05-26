@@ -54,9 +54,7 @@ namespace SushiScan.ViewModels
                     OnPropertyChanged(nameof(CurrentPageImage));
                 }
             }
-        }
-
-        public int PageCount => CurrentChapter?.Pages.Count ?? 0;
+        }        public int PageCount => AllPages.Count;
         public string PageInfo => PageCount > 0 ? $"Page {CurrentPageIndex + 1} sur {PageCount}" : "";
         public string ChapterDisplayTitle => CurrentChapter != null ? $"{CurrentChapter.MangaTitle} - Chapitre {CurrentChapter.Number}" : "Chargement...";
         
@@ -141,22 +139,30 @@ namespace SushiScan.ViewModels
             NextPageCommand = new RelayCommand(_ => LoadNextPage(), _ => CanLoadNextPage());
             PreviousPageCommand = new RelayCommand(_ => LoadPreviousPage(), _ => CanLoadPreviousPage());
         }
-        
-        private void LoadAllPages()
+          private void LoadAllPages()
         {
-            AllPages.Clear();
-            
+            // Cette méthode est maintenant utilisée uniquement pour le nettoyage
+            // Le chargement progressif se fait dans LoadChapterAsync via le callback
             if (CurrentChapter != null && CurrentChapter.Pages.Any())
             {
-                Console.WriteLine($"[DEBUG] Chargement de {CurrentChapter.Pages.Count} pages dans la vue");
-                foreach (var page in CurrentChapter.Pages)
+                Console.WriteLine($"[DEBUG] Finalisation du chargement de {CurrentChapter.Pages.Count} pages dans la vue");
+                
+                // S'assurer que AllPages a la bonne taille
+                while (AllPages.Count < CurrentChapter.Pages.Count)
                 {
-                    AllPages.Add(page);
+                    AllPages.Add(null);
+                }
+                
+                // Mettre à jour toutes les pages (au cas où il y aurait des écarts)
+                for (int i = 0; i < CurrentChapter.Pages.Count; i++)
+                {
+                    if (i < AllPages.Count)
+                    {
+                        AllPages[i] = CurrentChapter.Pages[i];
+                    }
                 }
             }
-        }
-
-        public async Task LoadChapterAsync(string mangaTitle, string scanName, string chapterNumber)
+        }        public async Task LoadChapterAsync(string mangaTitle, string scanName, string chapterNumber)
         {
             MangaTitle = mangaTitle;
             ScanName = scanName;
@@ -175,41 +181,69 @@ namespace SushiScan.ViewModels
             try
             {
                 Console.WriteLine($"[DEBUG] ChapterReaderViewModel: Début du chargement du chapitre {mangaTitle}, {scanName}, {chapterNumber}");
-                var chapterDetail = await _apiService.GetChapterPagesAsync(mangaTitle, scanName, chapterNumber);
+                
+                // Créer un callback de progression pour mettre à jour les pages au fur et à mesure
+                var progressCallback = new Progress<(int index, Bitmap? page)>(progress =>
+                {
+                    Console.WriteLine($"[DEBUG] Page reçue: index {progress.index}, image: {(progress.page != null ? "OK" : "NULL")}");
+                    
+                    // S'assurer que la collection AllPages a la bonne taille
+                    while (AllPages.Count <= progress.index)
+                    {
+                        AllPages.Add(null);
+                    }
+                    
+                    // Mettre à jour la page à l'index spécifié
+                    AllPages[progress.index] = progress.page;
+                    
+                    // Forcer la mise à jour des propriétés liées
+                    OnPropertyChanged(nameof(PageCount));
+                    OnPropertyChanged(nameof(PageInfo));
+                });
+                
+                var chapterDetail = await _apiService.GetChapterPagesAsync(mangaTitle, scanName, chapterNumber, progressCallback);
                 
                 if (chapterDetail != null)
                 {
                     Console.WriteLine($"[DEBUG] Chapitre récupéré avec {chapterDetail.Pages.Count} pages");
+                    
+                    // Initialiser la collection AllPages avec le bon nombre de placeholders
+                    AllPages.Clear();
+                    for (int i = 0; i < chapterDetail.ImageUrls.Count; i++)
+                    {
+                        AllPages.Add(null);
+                    }
+                    
+                    // Notifier immédiatement pour afficher les placeholders
+                    OnPropertyChanged(nameof(PageCount));
+                    OnPropertyChanged(nameof(PageInfo));
+                    
+                    // Mettre à jour toutes les pages finales
                     for (int i = 0; i < chapterDetail.Pages.Count; i++)
                     {
-                        var page = chapterDetail.Pages[i];
-                        if (page != null)
+                        if (i < AllPages.Count)
                         {
-                            Console.WriteLine($"[DEBUG] Page {i+1}: Dimensions {page.Size.Width}x{page.Size.Height}, PixelSize {page.PixelSize.Width}x{page.PixelSize.Height}");
-                        }
-                        else
-                        {
-                            Console.WriteLine($"[DEBUG] Page {i+1}: NULL!");
+                            AllPages[i] = chapterDetail.Pages[i];
                         }
                     }
                     
                     CurrentChapter = chapterDetail;
                     CurrentPageIndex = 0; // Réinitialiser à la première page
                     
-                    if (CurrentChapter.Pages.Count == 0)
+                    if (chapterDetail.Pages.Count == 0)
                     {
                         ErrorMessage = "Aucune page trouvée pour ce chapitre.";
                         Console.WriteLine("[DEBUG] Aucune page dans le chapitre");
                     }
                     else
                     {
-                        Console.WriteLine($"[DEBUG] Chapitre assigné au ViewModel, affichage de {CurrentChapter.Pages.Count} pages");
+                        Console.WriteLine($"[DEBUG] Chapitre assigné au ViewModel, affichage de {chapterDetail.Pages.Count} pages");
                     }
                 }
                 else
                 {
                     ErrorMessage = "Impossible de charger les détails du chapitre.";
-                    Console.WriteLine("[DEBUG] chapterDetail est null après l'appel à GetChapterDetailAsync");
+                    Console.WriteLine("[DEBUG] chapterDetail est null après l'appel à GetChapterPagesAsync");
                 }
             }
             catch (Exception ex)
