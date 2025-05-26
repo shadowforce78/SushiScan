@@ -50,10 +50,21 @@ namespace SushiScan.Views
             if (DataContext is ChapterReaderViewModel vm)
             {
                 Console.WriteLine($"[DEBUG] Nouveau DataContext est ChapterReaderViewModel, AllPages: {(vm.AllPages?.Count > 0 ? $"{vm.AllPages.Count} pages" : "aucune page")}");
+                vm.PropertyChanged += ViewModel_PropertyChanged;
             }
             else
             {
                 Console.WriteLine($"[DEBUG] Nouveau DataContext n'est pas ChapterReaderViewModel: {DataContext?.GetType().Name ?? "null"}");
+            }
+        }
+
+        private void ViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ChapterReaderViewModel.CurrentChapter))
+            {
+                // Défiler vers le haut lorsque le chapitre change
+                var scrollViewer = this.FindControl<ScrollViewer>("PageScrollViewer");
+                scrollViewer?.ScrollToHome();
             }
         }
     }

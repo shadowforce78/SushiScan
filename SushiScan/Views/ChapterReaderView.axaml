@@ -60,6 +60,7 @@
 
       <!-- Images viewer - affiche toutes les pages -->
       <ScrollViewer Grid.Row="0" 
+                   x:Name="PageScrollViewer"
                    Background="#1E1E1E"
                    HorizontalScrollBarVisibility="Disabled"
                    VerticalScrollBarVisibility="Auto"

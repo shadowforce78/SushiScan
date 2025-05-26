@@ -186,6 +186,7 @@ namespace SushiScan.ViewModels
                     }
                     
                     CurrentChapter = chapterDetail;
+                    CurrentPageIndex = 0; // Réinitialiser à la première page
                     
                     if (CurrentChapter.Pages.Count == 0)
                     {
