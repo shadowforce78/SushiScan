@@ -18,14 +18,14 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+        
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
         
     - name: Restore dependencies
-      run: dotnet restore SushiScan.sln
+      run: dotnet restore SushiScan.Desktop/SushiScan.Desktop.csproj
       
     - name: Build Windows Desktop
       run: |
@@ -78,7 +78,7 @@ jobs:
           ./SushiScan-macOS-x64.tar.gz
 
   build-android:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     name: Build Android APK
     
     steps:
@@ -99,28 +99,26 @@ jobs:
     - name: Install .NET MAUI Workload
       run: dotnet workload install maui-android
       
-    - name: Restore dependencies
-      run: dotnet restore SushiScan.sln
+    - name: Restore Android dependencies
+      run: dotnet restore SushiScan.Android/SushiScan.Android.csproj
       
     - name: Build Android APK
       run: |
-        dotnet publish SushiScan.Android/SushiScan.Android.csproj `
-          -c Release `
-          -f net8.0-android `
-          -p:AndroidSdkDirectory="${env:ANDROID_HOME}" `
-          -p:JavaSdkDirectory="${env:JAVA_HOME}" `
+        dotnet publish SushiScan.Android/SushiScan.Android.csproj \
+          -c Release \
+          -f net9.0-android \
           -o ./publish/android
           
     - name: Find and rename APK
       run: |
-        $apkFile = Get-ChildItem -Path "./publish/android" -Filter "*.apk" -Recurse | Select-Object -First 1
-        if ($apkFile) {
-          Copy-Item $apkFile.FullName "./SushiScan-Android.apk"
-          Write-Host "APK trouvé et copié: $($apkFile.FullName)"
-        } else {
-          Write-Error "Aucun fichier APK trouvé"
+        apk_file=$(find ./publish/android -name "*.apk" | head -n 1)
+        if [ -n "$apk_file" ]; then
+          cp "$apk_file" "./SushiScan-Android.apk"
+          echo "APK trouvé et copié: $apk_file"
+        else
+          echo "Aucun fichier APK trouvé"
           exit 1
-        }
+        fi
         
     - name: Upload Android Artifact
       uses: actions/upload-artifact@v4
@@ -128,55 +126,8 @@ jobs:
         name: android-build
         path: ./SushiScan-Android.apk
 
-  build-ios:
-    runs-on: macos-latest
-    name: Build iOS IPA
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
-        
-    - name: Install .NET MAUI Workload
-      run: dotnet workload install maui-ios
-      
-    - name: Restore dependencies
-      run: dotnet restore SushiScan.sln
-      
-    - name: Build iOS (sans signature pour release publique)
-      run: |
-        dotnet build SushiScan.iOS/SushiScan.iOS.csproj \
-          -c Release \
-          -f net8.0-ios \
-          -p:RuntimeIdentifier=ios-arm64 \
-          -p:MtouchArch=ARM64 \
-          -p:CodesignKey="" \
-          -p:CodesignProvision="" \
-          -p:IpaPackageDir="./publish/ios/"
-          
-    - name: Find and rename IPA
-      run: |
-        find ./publish/ios -name "*.ipa" -exec cp {} ./SushiScan-iOS.ipa \;
-        if [ ! -f "./SushiScan-iOS.ipa" ]; then
-          echo "Aucun fichier IPA trouvé, création d'un placeholder"
-          echo "Build iOS nécessite une configuration de signature" > ./SushiScan-iOS-unsigned.txt
-        fi
-        
-    - name: Upload iOS Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: ios-build
-        path: |
-          ./SushiScan-iOS.ipa
-          ./SushiScan-iOS-unsigned.txt
-        if-no-files-found: warn
-
   create-release:
-    needs: [build-desktop, build-android, build-ios]
+    needs: [build-desktop, build-android]
     runs-on: ubuntu-latest
     name: Create GitHub Release
     
@@ -201,11 +152,6 @@ jobs:
         # Android build
         if [ -d "./artifacts/android-build" ]; then
           cp ./artifacts/android-build/* ./release-files/
-        fi
-        
-        # iOS build
-        if [ -d "./artifacts/ios-build" ]; then
-          cp ./artifacts/ios-build/* ./release-files/
         fi
         
         # Afficher les fichiers qui seront inclus dans la release
@@ -238,7 +184,8 @@ jobs:
         
         ### 📱 Mobile
         - **Android**: `SushiScan-Android.apk`
-        - **iOS**: `SushiScan-iOS.ipa` (nécessite une installation via TestFlight ou signature manuelle)
+        
+        > **Note**: La version iOS sera disponible dans une prochaine release
         
         ## 🚀 Installation
         
@@ -252,14 +199,10 @@ jobs:
         2. Autorisez l'installation d'applications tierces si nécessaire
         3. Installez l'APK
         
-        ### iOS
-        1. Le fichier IPA nécessite une signature de développeur ou TestFlight
-        2. Contactez les développeurs pour obtenir une version signée
-        
         ## 📝 Notes de version
         - Application de lecture de mangas/scans
         - Interface moderne avec Avalonia UI
-        - Support multi-plateformes
+        - Support multi-plateformes (Desktop + Android)
         - Cache local des images
         - Navigation fluide entre chapitres
         
