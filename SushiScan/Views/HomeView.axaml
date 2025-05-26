@@ -143,52 +143,56 @@
               <ItemsPanelTemplate>
                 <StackPanel Spacing="10"/>
               </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
+            </ItemsControl.ItemsPanel>            <ItemsControl.ItemTemplate>
               <DataTemplate x:DataType="models:MangaSearchResult">
                 <Border Classes="searchResultCard">
-                  <Grid ColumnDefinitions="Auto,*" Margin="10">
-                    <!-- Image du manga -->
-                    <Border Grid.Column="0" Width="80" Height="120" CornerRadius="6" ClipToBounds="True" Margin="0,0,10,0">
-                      <Panel>
-                        <!-- Fallback pour quand l'image n'est pas encore chargée -->
-                        <Rectangle Fill="#333333"/>
-                        <Image Source="{Binding Image}" Stretch="UniformToFill"/>
-                      </Panel>
-                    </Border>
-                    
-                    <!-- Informations du manga -->
-                    <StackPanel Grid.Column="1" Spacing="5">
-                      <TextBlock Text="{Binding Title}" 
-                                 Foreground="White"
-                                 FontWeight="Bold"
-                                 FontSize="18"
-                                 TextWrapping="Wrap"/>
-                      <StackPanel Orientation="Horizontal" Spacing="5">
-                        <TextBlock Text="Type:" Foreground="#AAAAAA"/>
-                        <TextBlock Text="{Binding Type}" Foreground="#FFFFFF"/>
+                  <Button Background="Transparent"
+                          Padding="0"
+                          Command="{Binding $parent[ItemsControl].DataContext.ShowMangaDetailCommand}"
+                          CommandParameter="{Binding Title}">
+                    <Grid ColumnDefinitions="Auto,*" Margin="10">
+                      <!-- Image du manga -->
+                      <Border Grid.Column="0" Width="80" Height="120" CornerRadius="6" ClipToBounds="True" Margin="0,0,10,0">
+                        <Panel>
+                          <!-- Fallback pour quand l'image n'est pas encore chargée -->
+                          <Rectangle Fill="#333333"/>
+                          <Image Source="{Binding Image}" Stretch="UniformToFill"/>
+                        </Panel>
+                      </Border>
+                      
+                      <!-- Informations du manga -->
+                      <StackPanel Grid.Column="1" Spacing="5">
+                        <TextBlock Text="{Binding Title}" 
+                                   Foreground="White"
+                                   FontWeight="Bold"
+                                   FontSize="18"
+                                   TextWrapping="Wrap"/>
+                        <StackPanel Orientation="Horizontal" Spacing="5">
+                          <TextBlock Text="Type:" Foreground="#AAAAAA"/>
+                          <TextBlock Text="{Binding Type}" Foreground="#FFFFFF"/>
+                        </StackPanel>
+                        <ItemsControl ItemsSource="{Binding Genres}">
+                          <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                              <WrapPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                          </ItemsControl.ItemsPanel>
+                          <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                              <Border Background="#2D4263" 
+                                      CornerRadius="4" 
+                                      Padding="5,2" 
+                                      Margin="0,2,4,2">
+                                <TextBlock Text="{Binding}" 
+                                           Foreground="White" 
+                                           FontSize="11"/>
+                              </Border>
+                            </DataTemplate>
+                          </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                       </StackPanel>
-                      <ItemsControl ItemsSource="{Binding Genres}">
-                        <ItemsControl.ItemsPanel>
-                          <ItemsPanelTemplate>
-                            <WrapPanel Orientation="Horizontal"/>
-                          </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                          <DataTemplate>
-                            <Border Background="#2D4263" 
-                                    CornerRadius="4" 
-                                    Padding="5,2" 
-                                    Margin="0,2,4,2">
-                              <TextBlock Text="{Binding}" 
-                                         Foreground="White" 
-                                         FontSize="11"/>
-                            </Border>
-                          </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                      </ItemsControl>
-                    </StackPanel>
-                  </Grid>
+                    </Grid>
+                  </Button>
                 </Border>
               </DataTemplate>
             </ItemsControl.ItemTemplate>
