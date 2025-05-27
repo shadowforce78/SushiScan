@@ -26,10 +26,10 @@ jobs:
       run: dotnet build SushiScan.Desktop/SushiScan.Desktop.csproj --configuration Release --no-restore
       
     - name: Publish Desktop App (Windows x64)
-      run: dotnet publish SushiScan.Desktop/SushiScan.Desktop.csproj --configuration Release --runtime win-x64 --self-contained true --output ./publish/win-x64 --publish-single-file true --self-contained true
+      run: dotnet publish SushiScan.Desktop/SushiScan.Desktop.csproj --configuration Release --runtime win-x64 --self-contained true --output ./publish/win-x64 --publish-single-file true
       
     - name: Publish Desktop App (Windows x86)
-      run: dotnet publish SushiScan.Desktop/SushiScan.Desktop.csproj --configuration Release --runtime win-x86 --self-contained true --output ./publish/win-x86 --publish-single-file true --self-contained true
+      run: dotnet publish SushiScan.Desktop/SushiScan.Desktop.csproj --configuration Release --runtime win-x86 --self-contained true --output ./publish/win-x86 --publish-single-file true
       
     - name: Upload Windows x64 Artifacts
       uses: actions/upload-artifact@v4
