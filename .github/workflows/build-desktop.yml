@@ -1,0 +1,121 @@
+name: Build SushiScan Apps
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-desktop:
+    name: Build Desktop Apps
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+        
+    - name: Restore dependencies (Desktop only)
+      run: |
+        dotnet restore SushiScan/SushiScan.csproj
+        dotnet restore SushiScan.Desktop/SushiScan.Desktop.csproj
+      
+    - name: Build Desktop App (Release)
+      run: dotnet build SushiScan.Desktop/SushiScan.Desktop.csproj --configuration Release --no-restore
+      
+    - name: Publish Desktop App (Windows x64)
+      run: dotnet publish SushiScan.Desktop/SushiScan.Desktop.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o ./publish/win-x64
+      
+    - name: Publish Desktop App (Windows x86)
+      run: dotnet publish SushiScan.Desktop/SushiScan.Desktop.csproj -c Release -r win-x86 --self-contained true -p:PublishSingleFile=true -o ./publish/win-x86
+      
+    - name: Publish Desktop App (Linux x64)
+      run: dotnet publish SushiScan.Desktop/SushiScan.Desktop.csproj -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true -o ./publish/linux-x64
+      
+    - name: Publish Desktop App (macOS x64)
+      run: dotnet publish SushiScan.Desktop/SushiScan.Desktop.csproj -c Release -r osx-x64 --self-contained true -p:PublishSingleFile=true -o ./publish/osx-x64
+      
+    - name: Publish Desktop App (macOS ARM64)
+      run: dotnet publish SushiScan.Desktop/SushiScan.Desktop.csproj -c Release -r osx-arm64 --self-contained true -p:PublishSingleFile=true -o ./publish/osx-arm64
+
+    - name: Upload Windows x64 Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: SushiScan-Desktop-Windows-x64
+        path: ./publish/win-x64/
+        retention-days: 30
+        
+    - name: Upload Windows x86 Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: SushiScan-Desktop-Windows-x86
+        path: ./publish/win-x86/
+        retention-days: 30
+        
+    - name: Upload Linux x64 Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: SushiScan-Desktop-Linux-x64
+        path: ./publish/linux-x64/
+        retention-days: 30
+        
+    - name: Upload macOS x64 Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: SushiScan-Desktop-macOS-x64
+        path: ./publish/osx-x64/
+        retention-days: 30
+        
+    - name: Upload macOS ARM64 Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: SushiScan-Desktop-macOS-ARM64
+        path: ./publish/osx-arm64/
+        retention-days: 30
+
+  build-android:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+        
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      
+    - name: Install .NET MAUI workload
+      run: dotnet workload install maui-android
+      
+    - name: Restore dependencies (Android only)
+      run: |
+        dotnet restore SushiScan/SushiScan.csproj
+        dotnet restore SushiScan.Android/SushiScan.Android.csproj
+      
+    - name: Publish Android APK
+      run: dotnet publish SushiScan.Android/SushiScan.Android.csproj -c Release -r android-arm64 --self-contained true -p:PublishSingleFile=false -p:PublishTrimmed=true -p:AndroidUseAapt2=true -o ./publish/android
+      
+    - name: Rename signed APK
+      run: |
+        if [ -f "./publish/android/com.CompanyName.SushiScan-Signed.apk" ]; then
+          mv "./publish/android/com.CompanyName.SushiScan-Signed.apk" "./publish/android/SushiScan-Android-Release.apk"
+        elif [ -f "./publish/android/com.CompanyName.SushiScan.apk" ]; then
+          mv "./publish/android/com.CompanyName.SushiScan.apk" "./publish/android/SushiScan-Android-Release.apk"
+        fi
+      
+    - name: Upload Android APK Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: SushiScan-Android-APK
+        path: ./publish/android/SushiScan-Android-Release.apk
+        retention-days: 30
