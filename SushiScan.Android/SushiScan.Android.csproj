@@ -4,19 +4,14 @@
         <TargetFramework>net9.0-android</TargetFramework>
         <SupportedOSPlatformVersion>21</SupportedOSPlatformVersion>
         <Nullable>enable</Nullable>
-        <ApplicationId>com.CompanyName.SushiScan</ApplicationId>
+        <ApplicationId>com.saumondeluxe.SushiScan</ApplicationId>
         <ApplicationVersion>1</ApplicationVersion>
         <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+        <ApplicationTitle>SushiScan</ApplicationTitle>
         <AndroidPackageFormat>apk</AndroidPackageFormat>
-        <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
-        <AndroidSdkDirectory>C:/Android</AndroidSdkDirectory>
-    </PropertyGroup>
-
-    <ItemGroup>
-        <AndroidResource Include="Icon.png">
-            <Link>Resources\drawable\Icon.png</Link>
-        </AndroidResource>
-    </ItemGroup>
+        <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>        <AndroidSdkDirectory>C:/Android</AndroidSdkDirectory>
+        <!-- ApplicationIcon removed to avoid Avalonia conflicts - ic_launcher will be used automatically -->
+    </PropertyGroup><!-- Android resources will be automatically included from Resources folder -->
 
     <ItemGroup>
         <PackageReference Include="Avalonia.Android"/>

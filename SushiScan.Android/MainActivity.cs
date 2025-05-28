@@ -6,7 +6,7 @@ using Avalonia.Android;
 namespace SushiScan.Android;
 
 [Activity(
-    Label = "SushiScan.Android",
+    Label = "Sushi Scan",
     Theme = "@style/MyTheme.NoActionBar",
     Icon = "@drawable/icon",
     MainLauncher = true,
