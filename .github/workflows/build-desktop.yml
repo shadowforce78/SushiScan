@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ main, master ]
 
+permissions:
+  contents: write  # Allows uploading artifacts and creating releases
+  id-token: write  # Required for creating releases with GitHub Actions
+
 jobs:
   build-desktop:
     name: Build Desktop Apps
