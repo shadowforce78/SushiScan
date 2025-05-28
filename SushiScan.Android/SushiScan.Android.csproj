@@ -9,32 +9,9 @@
         <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
         <ApplicationTitle>SushiScan</ApplicationTitle>
         <AndroidPackageFormat>apk</AndroidPackageFormat>
-        <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
-        <AndroidSdkDirectory>C:/Android</AndroidSdkDirectory>
-        <ApplicationIcon>@mipmap/ic_launcher</ApplicationIcon>
-    </PropertyGroup><ItemGroup>
-        <AndroidResource Include="Icon.png">
-            <Link>Resources\drawable\Icon.png</Link>
-        </AndroidResource>
-        <AndroidResource Include="..\SushiScan\Assets\Logo.ico">
-            <Link>Resources\mipmap-anydpi\ic_launcher.png</Link>
-        </AndroidResource>
-        <AndroidResource Include="..\SushiScan\Assets\Logo.ico">
-            <Link>Resources\mipmap-hdpi\ic_launcher.png</Link>
-        </AndroidResource>
-        <AndroidResource Include="..\SushiScan\Assets\Logo.ico">
-            <Link>Resources\mipmap-mdpi\ic_launcher.png</Link>
-        </AndroidResource>
-        <AndroidResource Include="..\SushiScan\Assets\Logo.ico">
-            <Link>Resources\mipmap-xhdpi\ic_launcher.png</Link>
-        </AndroidResource>
-        <AndroidResource Include="..\SushiScan\Assets\Logo.ico">
-            <Link>Resources\mipmap-xxhdpi\ic_launcher.png</Link>
-        </AndroidResource>
-        <AndroidResource Include="..\SushiScan\Assets\Logo.ico">
-            <Link>Resources\mipmap-xxxhdpi\ic_launcher.png</Link>
-        </AndroidResource>
-    </ItemGroup>
+        <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>        <AndroidSdkDirectory>C:/Android</AndroidSdkDirectory>
+        <!-- ApplicationIcon removed to avoid Avalonia conflicts - ic_launcher will be used automatically -->
+    </PropertyGroup><!-- Android resources will be automatically included from Resources folder -->
 
     <ItemGroup>
         <PackageReference Include="Avalonia.Android"/>
