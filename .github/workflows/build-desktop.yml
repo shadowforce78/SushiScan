@@ -110,10 +110,10 @@ jobs:
       run: dotnet publish SushiScan.Android/SushiScan.Android.csproj -c Release -r android-arm64 --self-contained true -p:PublishSingleFile=false -p:PublishTrimmed=true -p:AndroidUseAapt2=true -o ./publish/android
     - name: Rename signed APK
       run: |
-        if [ -f "./publish/android/com.CompanyName.SushiScan-Signed.apk" ]; then
-          mv "./publish/android/com.CompanyName.SushiScan-Signed.apk" "./publish/android/SushiScan-Android-Release.apk"
-        elif [ -f "./publish/android/com.CompanyName.SushiScan.apk" ]; then
-          mv "./publish/android/com.CompanyName.SushiScan.apk" "./publish/android/SushiScan-Android-Release.apk"
+        if [ -f "./publish/android/com.saumondeluxe.SushiScan-Signed.apk" ]; then
+          mv "./publish/android/com.saumondeluxe.SushiScan-Signed.apk" "./publish/android/SushiScan-Android-Release.apk"
+        elif [ -f "./publish/android/com.saumondeluxe.SushiScan.apk" ]; then
+          mv "./publish/android/com.saumondeluxe.SushiScan.apk" "./publish/android/SushiScan-Android-Release.apk"
         fi
         
     - name: Upload Android APK Artifacts
