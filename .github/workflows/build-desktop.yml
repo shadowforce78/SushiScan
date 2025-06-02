@@ -105,7 +105,7 @@ jobs:
         dotnet restore SushiScan.Android/SushiScan.Android.csproj
       
     - name: Publish Android APK
-      run: dotnet publish SushiScan.Android/SushiScan.Android.csproj -c Release -r android-arm64 --self-contained true -p:PublishSingleFile=false -p:PublishTrimmed=true -p:AndroidUseAapt2=true -o ./publish/android
+      run: dotnet publish SushiScan.Android/SushiScan.Android.csproj -c Release -r android-arm64 --self-contained true -p:PublishSingleFile=false -p:AndroidUseAapt2=true -o ./publish/android
     - name: Rename signed APK
       run: |
         if [ -f "./publish/android/com.saumondeluxe.SushiScan-Signed.apk" ]; then
