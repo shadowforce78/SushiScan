@@ -20,57 +20,186 @@ body {
 
 /* HEADER STYLES */
 .header {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 20px 30px;
     position: sticky;
     top: 0;
-    z-index: 100;
+    background: rgba(30, 60, 114, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 1000;
+    padding: 0 20px;
+    transition: all 0.3s ease;
 }
 
-.header nav ul {
+.header nav {
+    max-width: 1400px;
+    margin: 0 auto;
     display: flex;
-    justify-content: center;
-    list-style: none;
-    gap: 40px;
+    justify-content: space-between;
+    align-items: center;
+    height: 70px;
 }
 
-.header li {
-    position: relative;
-}
-
-.header li a {
-    text-decoration: none;
+/* Logo/Brand */
+.brand {
+    font-size: 24px;
+    font-weight: bold;
     color: #fff;
-    font-size: 18px;
-    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.brand:hover {
+    color: #ffd700;
+}
+
+/* Navigation desktop */
+.nav-links {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 30px;
+}
+
+.nav-links li a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 16px;
     padding: 10px 20px;
     border-radius: 25px;
     transition: all 0.3s ease;
     position: relative;
-    overflow: hidden;
 }
 
-.header li a::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s;
-}
-
-.header li a:hover::before {
-    left: 100%;
-}
-
-.header li a:hover {
-    background: rgba(255, 255, 255, 0.2);
+.nav-links li a:hover {
+    background: rgba(255, 255, 255, 0.1);
     transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.nav-links li a:active {
+    transform: translateY(0);
+}
+
+/* Burger Menu */
+.burger {
+    display: none;
+    flex-direction: column;
+    cursor: pointer;
+    width: 30px;
+    height: 25px;
+    justify-content: space-between;
+    padding: 2px 0;
+}
+
+.burger span {
+    width: 100%;
+    height: 3px;
+    background: #fff;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+    transform-origin: center;
+}
+
+/* Animation burger actif */
+.burger.active span:nth-child(1) {
+    transform: rotate(45deg) translate(8px, 8px);
+}
+
+.burger.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.burger.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(8px, -8px);
+}
+
+/* Menu mobile */
+.mobile-menu {
+    display: none;
+    position: fixed;
+    top: 70px;
+    left: 0;
+    width: 100%;
+    height: calc(100vh - 70px);
+    background: rgba(30, 60, 114, 0.98);
+    backdrop-filter: blur(15px);
+    z-index: 999;
+    padding: 20px;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.3s ease;
+}
+
+.mobile-menu.active {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.mobile-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.mobile-menu ul li {
+    margin-bottom: 15px;
+}
+
+.mobile-menu ul li a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: 500;
+    display: block;
+    padding: 15px 20px;
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mobile-menu ul li a:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateX(10px);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .nav-links {
+        display: none;
+    }
+    
+    .burger {
+        display: flex;
+    }
+    
+    .header {
+        padding: 0 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .brand {
+        font-size: 20px;
+    }
+    
+    .mobile-menu ul li a {
+        font-size: 16px;
+        padding: 12px 15px;
+    }
+    
+    .header nav {
+        height: 60px;
+    }
+    
+    .mobile-menu {
+        top: 60px;
+        height: calc(100vh - 60px);
+    }
 }
 
 /* FOOTER STYLES */

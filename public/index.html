@@ -7,19 +7,40 @@
         <title>Sushi Scan - Accueil</title>
         <link rel="stylesheet" href="./css/common.css">
         <link rel="stylesheet" href="./css/index.css">
+        <script src="./js/burger.js"></script>
         <script src="./js/index.js"></script>
     </head>
     <body>
         <div class="header">
-            <!-- Catalogue / Planning / Profil / Paramètres -->
             <nav>
-                <ul>
+                <a href="#" class="brand">🍣 Sushi Scan</a>
+                
+                <!-- Navigation desktop -->
+                <ul class="nav-links">
                     <li><a href="#">Catalogue</a></li>
                     <li><a href="#">Planning</a></li>
                     <li><a href="#">Profil</a></li>
                     <li><a href="#">Paramètres</a></li>
                 </ul>
+                
+                <!-- Burger menu -->
+                <div class="burger" onclick="toggleMobileMenu()">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </nav>
+            
+            <!-- Menu mobile -->
+            <div class="mobile-menu" id="mobileMenu">
+                <ul>
+                    <li><a href="#" onclick="closeMobileMenu()">📚 Catalogue</a></li>
+                    <li><a href="#" onclick="closeMobileMenu()">📅 Planning</a></li>
+                    <li><a href="#" onclick="closeMobileMenu()">👤 Profil</a></li>
+                    <li><a href="#" onclick="closeMobileMenu()">⚙️ Paramètres</a></li>
+                </ul>
             </div>
+        </div>
             <div class="main">
                 <div class="recommandation">
                     <p>📱 Recommandations</p>
@@ -36,24 +57,7 @@
                     <div class="carousel-container">
                         <button class="carousel-arrow left" onclick="scrollCarousel('classique', -1)">‹</button>
                         <div class="carousel-content">
-                            <!-- Exemple de card statique -->
-                            <div class="card">
-                                <button><img
-                                        src="https://cdn.statically.io/gh/Anime-Sama/IMG/img/contenu/jujutsu-kaisen.jpg"
-                                        alt="Jujutsu Kaisen" class="cover">
-                                    <p class="title">Jujutsu Kaisen</p>
-                                    <div class="genres">
-                                        <span class="genre-badge">Action</span>
-                                        <span class="genre-badge">Aventure</span>
-                                        <span class="genre-badge">School Life</span>
-                                        <span class="genre-badge">Yokai</span>
-                                        <span class="genre-badge">Surnaturel</span>
-                                        <span class="genre-badge">Magie</span>
-                                        <span class="genre-badge">Mystère</span>
-                                        <span class="genre-badge">Shônen</span>
-                                    </div>
-                                </button>
-                            </div>
+                            <!-- Les cards seront ajoutées ici par JavaScript -->
                         </div>
                         <button class="carousel-arrow right" onclick="scrollCarousel('classique', 1)">›</button>
                     </div>
