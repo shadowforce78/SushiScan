@@ -77,7 +77,7 @@ async function displayLast() {
         const chaptersBadge = manga.latest_chapter // String par exemple : "Chapitre 153 à 155"
 
         card.innerHTML = `
-            <button class="${manga.slug}" onclick='alert("Manga: ${manga.title}")'>
+            <button class="${nameToSlug(manga.title)}" onclick='window.location.href = "./html/manga.html?slug=${nameToSlug(manga.title)}"'>
                 <img class="cover" src="${manga.image_url}" alt="${manga.title}">
                 <p class="title">${manga.title}</p>
                 <p class="chapters">${chaptersBadge}</p>
@@ -109,7 +109,7 @@ async function displayClassic() {
         ).join('');
 
         card.innerHTML = `
-            <button class="${manga.slug}" onclick='alert("Manga: ${manga.title}")'>
+            <button class="${nameToSlug(manga.title)}" onclick='window.location.href = "./html/manga.html?slug=${nameToSlug(manga.title)}"'>
                 <img class="cover" src="${manga.image_url}" alt="${manga.title}">
                 <p class="title">${manga.title}</p>
                 <div class="genres">
@@ -141,7 +141,7 @@ async function displayRecommended() {
         ).join('');
 
         card.innerHTML = `
-            <button class="${manga.slug}" onclick='alert("Manga: ${manga.title}")'>
+            <button class="${nameToSlug(manga.title)}" onclick='window.location.href = "./html/manga.html?slug=${nameToSlug(manga.title)}"'>
                 <img class="cover" src="${manga.image_url}" alt="${manga.title}">
                 <p class="title">${manga.title}</p>
                 <div class="genres">
@@ -164,6 +164,11 @@ function scrollCarousel(section, direction) {
         behavior: 'smooth'
     });
 }
+
+function nameToSlug(name) {
+    return encodeURIComponent(name)
+}
+
 
 window.addEventListener('DOMContentLoaded', async () => {
     await displayRecommended();
