@@ -88,6 +88,35 @@ async function displayLast() {
     });
 }
 
+async function searchManga(query) {
+    const endpoint = `${API_URL}/scans/manga?query=${query}`;
+
+    try {
+        const response = await fetch(endpoint);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        const results = []
+
+        for (const manga of data.results) {
+            const title = manga.title;
+            const imageUrl = manga.image_url;
+
+            results.push({
+                title: title,
+                imageUrl: imageUrl
+            });
+        }
+
+        return results;
+
+    } catch (error) {
+        console.error('Error fetching search results:', error);
+        return [];
+    }
+}
+
 
 async function displayClassic() {
     const classicDiv = document.querySelector('.classique .carousel-content');
@@ -169,9 +198,69 @@ function nameToSlug(name) {
     return encodeURIComponent(name)
 }
 
+function displaySearchResults(results) {
+    const searchResults = document.getElementById('searchResults');
+    const searchResultsContent = document.querySelector('.search-results-content');
+    
+    if (results.length === 0) {
+        searchResultsContent.innerHTML = '<p style="color: #fff; text-align: center; grid-column: 1 / -1;">Aucun manga trouvé.</p>';
+    } else {
+        searchResultsContent.innerHTML = results.map(manga => `
+            <div class="search-result-item" onclick="window.location.href = './html/manga.html?slug=${nameToSlug(manga.title)}'">
+                <img src="${manga.imageUrl}" alt="${manga.title}">
+                <p class="title">${manga.title}</p>
+            </div>
+        `).join('');
+    }
+    
+    searchResults.style.display = 'block';
+    searchResults.scrollIntoView({ behavior: 'smooth' });
+}
+
+function closeSearchResults() {
+    const searchResults = document.getElementById('searchResults');
+    const searchInput = document.getElementById('searchInput');
+    
+    searchResults.style.display = 'none';
+    searchInput.value = '';
+}
+
+function performSearch() {
+    const searchInput = document.getElementById('searchInput');
+    const query = searchInput.value.trim();
+    
+    if (query) {
+        searchManga(query).then(results => {
+            displaySearchResults(results);
+        });
+    }
+}
 
 window.addEventListener('DOMContentLoaded', async () => {
     await displayRecommended();
     await displayClassic();
     await displayLast();
+    
+    // Configuration de la barre de recherche
+    const searchInput = document.getElementById('searchInput');
+    const searchButton = document.getElementById('searchButton');
+
+    if (searchButton) {
+        searchButton.addEventListener('click', performSearch);
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                performSearch();
+            }
+        });
+        
+        // Fermer les résultats si on clique sur Escape
+        searchInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                closeSearchResults();
+            }
+        });
+    }
 });

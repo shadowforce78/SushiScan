@@ -10,6 +10,146 @@ body {
     margin: 0 auto;
 }
 
+/* SEARCH SECTION */
+.search-section {
+    margin-bottom: 50px;
+}
+
+.searchBar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.searchBar input {
+    width: 400px;
+    padding: 15px 20px;
+    border: none;
+    border-radius: 25px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    font-size: 16px;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.searchBar input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.searchBar input:focus {
+    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.searchBar button {
+    padding: 15px 20px;
+    border: none;
+    border-radius: 25px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+.searchBar button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+}
+
+.searchBar button:active {
+    transform: translateY(0);
+}
+
+/* SEARCH RESULTS */
+.search-results {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 20px;
+    margin-top: 20px;
+    animation: fadeInUp 0.3s ease;
+}
+
+.search-results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.search-results-header h3 {
+    color: #fff;
+    margin: 0;
+    font-size: 22px;
+    font-weight: 600;
+}
+
+.close-search {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: #fff;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.close-search:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+.search-results-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.search-result-item {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.search-result-item:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.search-result-item img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.search-result-item .title {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    margin: 0;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
 /* SECTIONS CARDS */
 .recommandation,
 .classique,
@@ -409,6 +549,48 @@ body {
     .main {
         padding: 20px 15px;
     }
+    
+    .searchBar {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .searchBar input {
+        width: 100%;
+        max-width: 350px;
+        padding: 12px 18px;
+        font-size: 14px;
+    }
+    
+    .searchBar button {
+        padding: 12px 18px;
+        font-size: 16px;
+    }
+    
+    .search-results {
+        padding: 15px;
+    }
+    
+    .search-results-header h3 {
+        font-size: 18px;
+    }
+    
+    .search-results-content {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+    }
+    
+    .search-result-item {
+        padding: 12px;
+    }
+    
+    .search-result-item img {
+        height: 150px;
+    }
+    
+    .search-result-item .title {
+        font-size: 12px;
+    }
 
     .carousel-arrow {
         width: 40px;
@@ -477,6 +659,15 @@ body {
 
     /* Masquer les flèches sur très petits écrans */
     @media (max-width: 480px) {
+        .searchBar input {
+            max-width: 280px;
+            padding: 10px 15px;
+        }
+        
+        .search-results-content {
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        }
+        
         .carousel-arrow {
             display: none;
         }

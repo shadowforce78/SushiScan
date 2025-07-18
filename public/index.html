@@ -42,6 +42,20 @@
             </div>
         </div>
             <div class="main">
+                <div class="search-section">
+                    <div class="searchBar">
+                        <input type="text" placeholder="Rechercher un manga..." id="searchInput">
+                        <button id="searchButton">🔍</button>
+                    </div>
+                    <div class="search-results" id="searchResults" style="display: none;">
+                        <div class="search-results-header">
+                            <h3>Résultats de recherche</h3>
+                            <button class="close-search" onclick="closeSearchResults()">✕</button>
+                        </div>
+                        <div class="search-results-content"></div>
+                    </div>
+                </div>
+
                 <div class="recommandation">
                     <p>📱 Recommandations</p>
                     <div class="carousel-container">
