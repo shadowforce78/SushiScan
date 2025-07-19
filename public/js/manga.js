@@ -6,6 +6,30 @@ const mangaName = new URLSearchParams(window.location.search).get("slug");
 let currentManga = null;
 let isLoading = false;
 
+// Fonction utilitaire pour formater les genres avec limite
+function formatGenres(genres, isMobile = false) {
+    if (!genres || genres.length === 0) return '<span class="no-genres">Aucun genre spécifié</span>';
+    
+    const maxGenres = isMobile ? 6 : 8; // Limiter davantage sur mobile
+    
+    if (genres.length <= maxGenres) {
+        return genres.map(genre => `<span class="genre-tag">${genre}</span>`).join('');
+    }
+    
+    const visibleGenres = genres.slice(0, maxGenres - 1);
+    const remainingCount = genres.length - visibleGenres.length;
+    
+    const visibleGenresHtml = visibleGenres.map(genre => `<span class="genre-tag">${genre}</span>`).join('');
+    const moreGenresHtml = `<span class="genre-tag more-genres" title="${genres.slice(maxGenres - 1).join(', ')}">+${remainingCount} autres</span>`;
+    
+    return visibleGenresHtml + moreGenresHtml;
+}
+
+// Fonction utilitaire pour détecter si on est sur mobile
+function isMobileDevice() {
+    return window.innerWidth <= 768;
+}
+
 // Fonction pour obtenir les informations du manga
 async function getInfo(mangaName) {
     const endpoint = `${API_URL}/scans/manga/info?manga_name=${encodeURIComponent(mangaName)}`;
@@ -117,7 +141,8 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
 
     currentManga = mangaInfo.manga;
-    const genres = mangaInfo.manga.genres.map(genre => `<span class="genre-tag">${genre}</span>`).join('');
+    const isMobile = isMobileDevice();
+    const genres = formatGenres(mangaInfo.manga.genres, isMobile);
 
     const scansType = [];
     for (const type of mangaInfo.manga.scan_chapters) {
@@ -128,19 +153,40 @@ window.addEventListener('DOMContentLoaded', async () => {
         `);
     }
 
+    // Ajouter une description si elle existe dans les données
+    const descriptionHtml = mangaInfo.manga.description ? `
+        <div class="manga-description">
+            <p>${mangaInfo.manga.description}</p>
+        </div>
+    ` : '';
+
+    // Ajouter des statistiques si elles existent
+    const statsHtml = (mangaInfo.manga.rating || mangaInfo.manga.status || mangaInfo.manga.year) ? `
+        <div class="manga-stats">
+            ${mangaInfo.manga.rating ? `<div class="stat-item"><div class="stat-label">Note</div><div class="stat-value">${mangaInfo.manga.rating}/10</div></div>` : ''}
+            ${mangaInfo.manga.status ? `<div class="stat-item"><div class="stat-label">Statut</div><div class="stat-value">${mangaInfo.manga.status}</div></div>` : ''}
+            ${mangaInfo.manga.year ? `<div class="stat-item"><div class="stat-label">Année</div><div class="stat-value">${mangaInfo.manga.year}</div></div>` : ''}
+        </div>
+    ` : '';
+
     document.querySelector('.main').innerHTML = `
         <div class="manga-info">
             <img src="${mangaInfo.manga.image_url}" 
                  alt="${mangaInfo.manga.title} cover" 
                  class="manga-cover"
-                 onerror="this.src='https://via.placeholder.com/200x280?text=No+Cover'">
+                 onerror="this.src='https://via.placeholder.com/400x520/2c5364/ffffff?text=Couverture+non+disponible'">
             
             <div class="manga-info-content">
                 <h1 class="manga-title">${mangaInfo.manga.title}</h1>
                 
+                ${descriptionHtml}
+                
                 <div class="manga-genres">
-                    <strong>Genres :</strong> ${genres}
+                    <strong>Genres :</strong>
+                    ${genres}
                 </div>
+                
+                ${statsHtml}
                 
                 <div class="scan-types">
                     <h3>Types de scan disponibles :</h3>
@@ -156,4 +202,35 @@ window.addEventListener('DOMContentLoaded', async () => {
             </div>
         </div>
     `;
+
+    // Ajouter un gestionnaire pour l'indicateur "+X autres" genres
+    const moreGenresBtn = document.querySelector('.genre-tag.more-genres');
+    if (moreGenresBtn) {
+        moreGenresBtn.addEventListener('click', () => {
+            const allGenres = mangaInfo.manga.genres.map(genre => `<span class="genre-tag">${genre}</span>`).join('');
+            const genresContainer = document.querySelector('.manga-genres');
+            const strong = genresContainer.querySelector('strong');
+            genresContainer.innerHTML = '';
+            genresContainer.appendChild(strong);
+            genresContainer.insertAdjacentHTML('beforeend', allGenres);
+        });
+    }
+});
+
+// Gestionnaire de redimensionnement pour adapter l'affichage des genres
+window.addEventListener('resize', () => {
+    if (currentManga && currentManga.genres) {
+        const genresContainer = document.querySelector('.manga-genres');
+        if (genresContainer && !genresContainer.querySelector('.genre-tag.more-genres')) {
+            // Seulement si on n'a pas déjà étendu la vue
+            const isMobile = isMobileDevice();
+            const genres = formatGenres(currentManga.genres, isMobile);
+            const strong = genresContainer.querySelector('strong');
+            if (strong) {
+                genresContainer.innerHTML = '';
+                genresContainer.appendChild(strong);
+                genresContainer.insertAdjacentHTML('beforeend', genres);
+            }
+        }
+    }
 });

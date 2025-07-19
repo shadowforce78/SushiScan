@@ -89,6 +89,24 @@
         flex-wrap: wrap;
         gap: var(--spacing-xs);
         align-items: center;
+        max-height: 100px;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: var(--glass-medium) transparent;
+        padding-right: var(--spacing-xs);
+    }
+
+    .manga-genres::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .manga-genres::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .manga-genres::-webkit-scrollbar-thumb {
+        background: var(--glass-medium);
+        border-radius: var(--radius-small);
     }
 
     .manga-genres strong {
@@ -96,6 +114,7 @@
         font-weight: var(--font-weight-bold);
         margin-right: var(--spacing-md);
         color: var(--text-primary);
+        flex-shrink: 0;
     }
 
     .genre-tag {
@@ -109,11 +128,29 @@
         margin-bottom: 0.3rem;
         transition: all var(--transition-fast);
         box-shadow: var(--shadow-light);
+        white-space: nowrap;
+        flex-shrink: 0;
     }
 
     .genre-tag:hover {
         background: var(--glass-strong);
         transform: translateY(-2px) scale(1.04);
+    }
+
+    .genre-tag.more-genres {
+        background: var(--accent-gradient);
+        color: var(--white);
+        cursor: pointer;
+        font-weight: var(--font-weight-bold);
+    }
+
+    .no-genres {
+        color: var(--text-muted);
+        font-style: italic;
+        padding: var(--spacing-xs) var(--spacing-md);
+        background: var(--glass-light);
+        border-radius: var(--radius-medium);
+        border: 1px dashed var(--glass-border);
     }
 
     .manga-stats {
@@ -408,6 +445,24 @@
         margin-bottom: var(--spacing-md);
         gap: var(--spacing-xs);
         justify-content: center;
+        max-height: 120px;
+        overflow-y: auto;
+        padding: var(--spacing-xs) 0;
+        scrollbar-width: thin;
+        scrollbar-color: var(--glass-medium) transparent;
+    }
+
+    .manga-genres::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .manga-genres::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .manga-genres::-webkit-scrollbar-thumb {
+        background: var(--glass-medium);
+        border-radius: var(--radius-small);
     }
 
     .manga-genres strong {
@@ -416,12 +471,37 @@
         display: block;
         width: 100%;
         margin-bottom: var(--spacing-xs);
+        flex-shrink: 0;
     }
 
     .genre-tag {
-        padding: 0.4rem var(--spacing-sm);
+        padding: 0.3rem var(--spacing-xs);
+        font-size: 0.8rem;
+        border-radius: var(--radius-medium);
+        white-space: nowrap;
+        flex-shrink: 0;
+        max-width: calc(50% - 0.25rem);
+        text-align: center;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .genre-tag.more-genres {
+        background: var(--accent-gradient);
+        color: var(--white);
+        cursor: pointer;
+        font-weight: var(--font-weight-bold);
+        max-width: none;
+    }
+
+    .no-genres {
+        color: var(--text-muted);
+        font-style: italic;
+        padding: var(--spacing-xs);
+        background: var(--glass-light);
+        border-radius: var(--radius-medium);
+        border: 1px dashed var(--glass-border);
         font-size: 0.9rem;
-        border-radius: var(--radius-large);
     }
 
     .manga-stats {
