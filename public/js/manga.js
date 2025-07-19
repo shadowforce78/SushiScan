@@ -135,15 +135,17 @@ window.addEventListener('DOMContentLoaded', async () => {
                  class="manga-cover"
                  onerror="this.src='https://via.placeholder.com/200x280?text=No+Cover'">
             
-            <h1 class="manga-title">${mangaInfo.manga.title}</h1>
-            
-            <div class="manga-genres">
-                ${genres}
-            </div>
-            
-            <div class="scan-types">
-                <h3>Types de scan disponibles :</h3>
-                ${scansType.join('')}
+            <div class="manga-info-content">
+                <h1 class="manga-title">${mangaInfo.manga.title}</h1>
+                
+                <div class="manga-genres">
+                    <strong>Genres :</strong> ${genres}
+                </div>
+                
+                <div class="scan-types">
+                    <h3>Types de scan disponibles :</h3>
+                    ${scansType.join('')}
+                </div>
             </div>
         </div>
         
