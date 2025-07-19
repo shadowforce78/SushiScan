@@ -7,7 +7,8 @@ function createWindow() {
         height: 800,
         webPreferences: {
             contextIsolation: true
-        }
+        },
+        autoHideMenuBar: true
     });
 
     win.loadFile(path.join(__dirname, '../public', 'index.html'));

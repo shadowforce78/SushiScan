@@ -8,31 +8,34 @@
     --primary-gradient: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
     --accent-gradient: linear-gradient(90deg, #ff6b6b 0%, #ffa500 100%);
     --secondary-gradient: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-    
+
     /* Couleurs solides */
     --white: #ffffff;
     --black: #000000;
     --text-primary: #ffffff;
     --text-secondary: rgba(255, 255, 255, 0.8);
     --text-muted: rgba(255, 255, 255, 0.6);
-    
+
     /* Backgrounds avec transparence */
     --glass-light: rgba(255, 255, 255, 0.07);
     --glass-medium: rgba(255, 255, 255, 0.12);
     --glass-strong: rgba(255, 255, 255, 0.18);
     --glass-border: rgba(255, 255, 255, 0.15);
-    
+
+    /* Backgrounds teinté */
+    --tinted-glass: rgba(32, 58, 67, 0.91);
+
     /* Ombres */
     --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.08);
     --shadow-medium: 0 8px 24px rgba(0, 0, 0, 0.12);
     --shadow-strong: 0 16px 40px rgba(0, 0, 0, 0.22);
-    
+
     /* Rayons de bordure */
     --radius-small: 8px;
     --radius-medium: 12px;
     --radius-large: 18px;
     --radius-xl: 20px;
-    
+
     /* Espacements */
     --spacing-xs: 0.5rem;
     --spacing-sm: 1rem;
@@ -40,7 +43,7 @@
     --spacing-lg: 2rem;
     --spacing-xl: 3rem;
     --spacing-xxl: 4rem;
-    
+
     /* Typographie */
     --font-primary: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-weight-normal: 400;
@@ -48,12 +51,12 @@
     --font-weight-semibold: 600;
     --font-weight-bold: 700;
     --font-weight-extrabold: 800;
-    
+
     /* Transitions */
     --transition-fast: 0.2s ease;
     --transition-medium: 0.3s ease;
     --transition-slow: 0.5s ease;
-    
+
     /* Z-index */
     --z-header: 1000;
     --z-modal: 2000;
@@ -82,7 +85,7 @@ body {
     color: var(--text-primary);
     line-height: 1.6;
     overflow-x: hidden;
-    
+
     /* Safe area insets pour les appareils mobiles */
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
@@ -208,7 +211,7 @@ body {
     left: 0;
     width: 100%;
     height: calc(100vh - 70px);
-    background: var(--glass-medium);
+    background: var(--tinted-glass);
     backdrop-filter: blur(20px);
     z-index: calc(var(--z-header) - 1);
     padding: var(--spacing-lg);
@@ -348,30 +351,85 @@ a {
 }
 
 /* Classes utilitaires */
-.text-center { text-align: center; }
-.text-left { text-align: left; }
-.text-right { text-align: right; }
+.text-center {
+    text-align: center;
+}
 
-.font-light { font-weight: var(--font-weight-normal); }
-.font-medium { font-weight: var(--font-weight-medium); }
-.font-semibold { font-weight: var(--font-weight-semibold); }
-.font-bold { font-weight: var(--font-weight-bold); }
-.font-extrabold { font-weight: var(--font-weight-extrabold); }
+.text-left {
+    text-align: left;
+}
 
-.mb-sm { margin-bottom: var(--spacing-sm); }
-.mb-md { margin-bottom: var(--spacing-md); }
-.mb-lg { margin-bottom: var(--spacing-lg); }
-.mb-xl { margin-bottom: var(--spacing-xl); }
+.text-right {
+    text-align: right;
+}
 
-.mt-sm { margin-top: var(--spacing-sm); }
-.mt-md { margin-top: var(--spacing-md); }
-.mt-lg { margin-top: var(--spacing-lg); }
-.mt-xl { margin-top: var(--spacing-xl); }
+.font-light {
+    font-weight: var(--font-weight-normal);
+}
 
-.p-sm { padding: var(--spacing-sm); }
-.p-md { padding: var(--spacing-md); }
-.p-lg { padding: var(--spacing-lg); }
-.p-xl { padding: var(--spacing-xl); }
+.font-medium {
+    font-weight: var(--font-weight-medium);
+}
+
+.font-semibold {
+    font-weight: var(--font-weight-semibold);
+}
+
+.font-bold {
+    font-weight: var(--font-weight-bold);
+}
+
+.font-extrabold {
+    font-weight: var(--font-weight-extrabold);
+}
+
+.mb-sm {
+    margin-bottom: var(--spacing-sm);
+}
+
+.mb-md {
+    margin-bottom: var(--spacing-md);
+}
+
+.mb-lg {
+    margin-bottom: var(--spacing-lg);
+}
+
+.mb-xl {
+    margin-bottom: var(--spacing-xl);
+}
+
+.mt-sm {
+    margin-top: var(--spacing-sm);
+}
+
+.mt-md {
+    margin-top: var(--spacing-md);
+}
+
+.mt-lg {
+    margin-top: var(--spacing-lg);
+}
+
+.mt-xl {
+    margin-top: var(--spacing-xl);
+}
+
+.p-sm {
+    padding: var(--spacing-sm);
+}
+
+.p-md {
+    padding: var(--spacing-md);
+}
+
+.p-lg {
+    padding: var(--spacing-lg);
+}
+
+.p-xl {
+    padding: var(--spacing-xl);
+}
 
 /* Effet de verre pour cards */
 .glass-card {
@@ -400,11 +458,11 @@ a {
         --spacing-xl: 2.5rem;
         --spacing-xxl: 3.5rem;
     }
-    
+
     .container {
         padding: 0 var(--spacing-md);
     }
-    
+
     .main {
         padding: var(--spacing-md);
     }
@@ -415,15 +473,15 @@ a {
     .nav-links {
         display: none;
     }
-    
+
     .burger {
         display: flex;
     }
-    
+
     .header {
         padding: 0 var(--spacing-md);
     }
-    
+
     .main {
         padding: var(--spacing-md);
         min-height: calc(100vh - 120px);
@@ -439,34 +497,34 @@ a {
         --spacing-xl: 2rem;
         --spacing-xxl: 2.5rem;
     }
-    
+
     .brand {
         font-size: 1.25rem;
     }
-    
+
     .mobile-menu ul li a {
         font-size: 1rem;
         padding: var(--spacing-sm) var(--spacing-md);
     }
-    
+
     .header nav {
         height: 60px;
     }
-    
+
     .mobile-menu {
         top: 60px;
         height: calc(100vh - 60px);
         padding: var(--spacing-md);
     }
-    
+
     .container {
         padding: 0 var(--spacing-sm);
     }
-    
+
     .main {
         padding: var(--spacing-sm);
     }
-    
+
     .footer {
         padding: var(--spacing-lg) var(--spacing-sm);
         font-size: 0.875rem;
@@ -482,6 +540,7 @@ a {
         opacity: 0;
         transform: translateY(30px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -492,15 +551,19 @@ a {
     from {
         opacity: 0;
     }
+
     to {
         opacity: 1;
     }
 }
 
 @keyframes pulse {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: scale(1);
     }
+
     50% {
         transform: scale(1.05);
     }
@@ -510,6 +573,7 @@ a {
     0% {
         background-position: -200px 0;
     }
+
     100% {
         background-position: calc(200px + 100%) 0;
     }
