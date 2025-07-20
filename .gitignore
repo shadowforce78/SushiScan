@@ -3,3 +3,4 @@ package-lock.json
 android
 build.bat
 resources/android/**/*
+sushiscan.jks
