@@ -9,19 +9,19 @@ let isLoading = false;
 // Fonction utilitaire pour formater les genres avec limite
 function formatGenres(genres, isMobile = false) {
     if (!genres || genres.length === 0) return '<span class="no-genres">Aucun genre spécifié</span>';
-    
+
     const maxGenres = isMobile ? 6 : 8; // Limiter davantage sur mobile
-    
+
     if (genres.length <= maxGenres) {
         return genres.map(genre => `<span class="genre-tag">${genre}</span>`).join('');
     }
-    
+
     const visibleGenres = genres.slice(0, maxGenres - 1);
     const remainingCount = genres.length - visibleGenres.length;
-    
+
     const visibleGenresHtml = visibleGenres.map(genre => `<span class="genre-tag">${genre}</span>`).join('');
     const moreGenresHtml = `<span class="genre-tag more-genres" title="${genres.slice(maxGenres - 1).join(', ')}">+${remainingCount} autres</span>`;
-    
+
     return visibleGenresHtml + moreGenresHtml;
 }
 
