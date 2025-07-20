@@ -8,7 +8,8 @@ function createWindow() {
         webPreferences: {
             contextIsolation: true
         },
-        autoHideMenuBar: true
+        autoHideMenuBar: true,
+        icon: path.join(__dirname, '../resources', 'icon.png')
     });
 
     win.loadFile(path.join(__dirname, '../public', 'index.html'));
