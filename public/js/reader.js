@@ -48,6 +48,13 @@ function displayImgs(scanData) {
             img.src = page;
             img.alt = 'Scan Image';
             img.classList.add('scan-image');
+            img.style = `
+                width: 100%;
+                max-width: 800px; /* Adjust as needed */
+                height: auto;
+                display: block;
+                margin: 0px auto;
+            `;
             imgDiv.appendChild(img);
         }
     } else {
