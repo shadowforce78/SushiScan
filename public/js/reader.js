@@ -80,6 +80,28 @@ async function createHeader() {
         nav.appendChild(nextLink);
 
     }
+
+
+    // Dropdown for chapter selection
+    const chapterSelect = document.createElement('select');
+    chapterSelect.classList.add('chapter-select');
+    chapterSelect.addEventListener('change', (event) => {
+        const selectedChapter = event.target.value;
+        window.location.href = `../html/reader.html?manga=${encodeURIComponent(mangaName)}&chapter=${encodeURIComponent(selectedChapter)}&scan=${encodeURIComponent(scanType)}`;
+    });
+    const maxChapter = await getMaxChapter(mangaName, scanType);
+    if (maxChapter) {
+        for (let i = 1; i <= maxChapter; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = `Chapitre ${i}`;
+            chapterSelect.appendChild(option);
+        }
+    }
+    chapterSelect.value = chapter; // Set the current chapter as selected
+
+    nav.appendChild(chapterSelect);
+
     header.appendChild(nav);
     return await header;
 }
