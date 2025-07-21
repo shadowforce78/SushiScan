@@ -8,7 +8,9 @@ let isLoading = false;
 
 // Fonction utilitaire pour formater les genres avec limite
 function formatGenres(genres, isMobile = false) {
-    if (!genres || genres.length === 0) return '<span class="no-genres">Aucun genre spécifié</span>';
+    if (!genres || !Array.isArray(genres) || genres.length === 0) {
+        return '<span class="no-genres">Aucun genre spécifié</span>';
+    }
 
     const maxGenres = isMobile ? 6 : 8; // Limiter davantage sur mobile
 
@@ -142,7 +144,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     currentManga = mangaInfo.manga;
     const isMobile = isMobileDevice();
-    const genres = formatGenres(mangaInfo.manga.genres, isMobile);
+    const genres = formatGenres(mangaInfo.manga.genres || [], isMobile);
 
     const scansType = [];
     for (const type of mangaInfo.manga.scan_chapters) {
@@ -205,7 +207,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     // Ajouter un gestionnaire pour l'indicateur "+X autres" genres
     const moreGenresBtn = document.querySelector('.genre-tag.more-genres');
-    if (moreGenresBtn) {
+    if (moreGenresBtn && mangaInfo.manga.genres && Array.isArray(mangaInfo.manga.genres)) {
         moreGenresBtn.addEventListener('click', () => {
             const allGenres = mangaInfo.manga.genres.map(genre => `<span class="genre-tag">${genre}</span>`).join('');
             const genresContainer = document.querySelector('.manga-genres');
@@ -219,7 +221,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 // Gestionnaire de redimensionnement pour adapter l'affichage des genres
 window.addEventListener('resize', () => {
-    if (currentManga && currentManga.genres) {
+    if (currentManga && currentManga.genres && Array.isArray(currentManga.genres)) {
         const genresContainer = document.querySelector('.manga-genres');
         if (genresContainer && !genresContainer.querySelector('.genre-tag.more-genres')) {
             // Seulement si on n'a pas déjà étendu la vue
