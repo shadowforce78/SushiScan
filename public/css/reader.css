@@ -176,11 +176,9 @@
 .scan-images {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-sm);
     align-items: center;
     background: var(--glass-light);
     backdrop-filter: blur(14px);
-    border-radius: var(--radius-xl);
     border: 1px solid var(--glass-border);
     box-shadow: var(--shadow-light);
     padding: var(--spacing-xl);
@@ -191,7 +189,6 @@
     width: 100%;
     max-width: 800px;
     height: auto;
-    border-radius: var(--radius-medium);
     box-shadow: var(--shadow-medium);
     transition: all var(--transition-medium);
 }
@@ -263,11 +260,6 @@
 
     .scan-images {
         padding: var(--spacing-lg);
-        gap: var(--spacing-xs);
-    }
-
-    .scan-image {
-        border-radius: var(--radius-small);
     }
 
     .scroll-to-top {
