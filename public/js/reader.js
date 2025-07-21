@@ -106,6 +106,25 @@ async function createHeader() {
     return await header;
 }
 
+function scrollToTop() {
+
+    const scrollToTopButton = document.createElement('button');
+    scrollToTopButton.className = 'scroll-to-top';
+
+    scrollToTopButton.style.position = 'fixed';
+    scrollToTopButton.style.bottom = '20px';
+    scrollToTopButton.style.right = '20px';
+
+    scrollToTopButton.textContent = '↑';
+    scrollToTopButton.onclick = () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    };
+    document.body.appendChild(scrollToTopButton);
+}
+
 function displayImgs(scanData) {
     const imgDiv = document.createElement('div');
     imgDiv.classList.add('scan-images');
@@ -134,4 +153,6 @@ window.addEventListener('DOMContentLoaded', async () => {
     const scanData = await fetchScanData(mangaName, chapter, scanType);
     document.querySelector('.main').appendChild(await createHeader());
     displayImgs(scanData);
+
+    scrollToTop();
 });
