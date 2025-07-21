@@ -1,5 +1,4 @@
-const API_URL = 'https://api.saumondeluxe.com'
-
+const API_URL = "https://api.saumondeluxe.com";
 
 async function getRecommended() {
     const endpoint = `${API_URL}/scans/manga/recommended`;
@@ -11,13 +10,14 @@ async function getRecommended() {
         }
         const data = await response.json();
         // I only want the recommended array where the manga as Scans,Webtoon or Manwha types
-        return data.recommended.filter(manga =>
-            manga.types.includes('Scans') ||
-            manga.types.includes('Webtoon') ||
-            manga.types.includes('Manwha')
+        return data.recommended.filter(
+            (manga) =>
+                manga.types.includes("Scans") ||
+                manga.types.includes("Webtoon") ||
+                manga.types.includes("Manwha")
         );
     } catch (error) {
-        console.error('Error fetching recommended:', error);
+        console.error("Error fetching recommended:", error);
         return [];
     }
 }
@@ -32,13 +32,14 @@ async function getClassic() {
         }
         const data = await response.json();
         // I only want the classic array where the manga as Scans,Webtoon or Manwha types
-        return data.classics.filter(manga =>
-            manga.types.includes('Scans') ||
-            manga.types.includes('Webtoon') ||
-            manga.types.includes('Manwha')
+        return data.classics.filter(
+            (manga) =>
+                manga.types.includes("Scans") ||
+                manga.types.includes("Webtoon") ||
+                manga.types.includes("Manwha")
         );
     } catch (error) {
-        console.error('Error fetching classic:', error);
+        console.error("Error fetching classic:", error);
         return [];
     }
 }
@@ -51,34 +52,38 @@ async function getLast() {
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const data = await response.json()
-        return data.last_manga
+        const data = await response.json();
+        return data.last_manga;
     } catch (error) {
-        console.error('Error fetching last:', error);
+        console.error("Error fetching last:", error);
         return [];
     }
 }
 
 async function displayLast() {
-    const lastDiv = document.querySelector('.nouveau .carousel-content');
+    const lastDiv = document.querySelector(".nouveau .carousel-content");
     const lastMangas = await getLast();
 
     if (lastMangas.length === 0) {
-        lastDiv.innerHTML = '<p>Aucun manga trouvé.</p>';
+        lastDiv.innerHTML = "<p>Aucun manga trouvé.</p>";
         return;
     }
 
-    lastMangas.forEach(manga => {
-
-        const card = document.createElement('div');
-        card.className = 'card';
+    lastMangas.forEach((manga) => {
+        const card = document.createElement("div");
+        card.className = "card";
 
         // Créer les badges de chapitre en cours
-        const chaptersBadge = manga.latest_chapter // String par exemple : "Chapitre 153 à 155"
+        const chaptersBadge = manga.latest_chapter; // String par exemple : "Chapitre 153 à 155"
 
         card.innerHTML = `
-            <button class="${nameToSlug(manga.title)}" onclick='window.location.href = "./html/manga.html?slug=${nameToSlug(manga.title)}"'>
-                <img class="cover" src="${manga.image_url}" alt="${manga.title}">
+            <button class="${nameToSlug(
+            manga.title
+        )}" onclick='window.location.href = "./html/manga.html?slug=${nameToSlug(
+            manga.title
+        )}"'>
+                <img class="cover" src="${manga.image_url}" alt="${manga.title
+            }">
                 <p class="title">${manga.title}</p>
                 <p class="chapters">${chaptersBadge}</p>
 
@@ -97,7 +102,7 @@ async function searchManga(query) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        const results = []
+        const results = [];
 
         for (const manga of data.results) {
             const title = manga.title;
@@ -105,41 +110,43 @@ async function searchManga(query) {
 
             results.push({
                 title: title,
-                imageUrl: imageUrl
+                imageUrl: imageUrl,
             });
         }
 
         return results;
-
     } catch (error) {
-        console.error('Error fetching search results:', error);
+        console.error("Error fetching search results:", error);
         return [];
     }
 }
 
-
 async function displayClassic() {
-    const classicDiv = document.querySelector('.classique .carousel-content');
+    const classicDiv = document.querySelector(".classique .carousel-content");
     const classicMangas = await getClassic();
 
     if (classicMangas.length === 0) {
-        classicDiv.innerHTML = '<p>Aucun manga classique trouvé.</p>';
+        classicDiv.innerHTML = "<p>Aucun manga classique trouvé.</p>";
         return;
     }
 
-    classicMangas.forEach(manga => {
-
-        const card = document.createElement('div');
-        card.className = 'card';
+    classicMangas.forEach((manga) => {
+        const card = document.createElement("div");
+        card.className = "card";
 
         // Créer les badges de genres
-        const genresBadges = manga.genres.map(genre =>
-            `<span class="genre-badge">${genre}</span>`
-        ).join('');
+        const genresBadges = manga.genres
+            .map((genre) => `<span class="genre-badge">${genre}</span>`)
+            .join("");
 
         card.innerHTML = `
-            <button class="${nameToSlug(manga.title)}" onclick='window.location.href = "./html/manga.html?slug=${nameToSlug(manga.title)}"'>
-                <img class="cover" src="${manga.image_url}" alt="${manga.title}">
+            <button class="${nameToSlug(
+            manga.title
+        )}" onclick='window.location.href = "./html/manga.html?slug=${nameToSlug(
+            manga.title
+        )}"'>
+                <img class="cover" src="${manga.image_url}" alt="${manga.title
+            }">
                 <p class="title">${manga.title}</p>
                 <div class="genres">
                     ${genresBadges}
@@ -151,27 +158,33 @@ async function displayClassic() {
 }
 
 async function displayRecommended() {
-    const recommendedDiv = document.querySelector('.recommandation .carousel-content');
+    const recommendedDiv = document.querySelector(
+        ".recommandation .carousel-content"
+    );
     const recommendedMangas = await getRecommended();
 
     if (recommendedMangas.length === 0) {
-        recommendedDiv.innerHTML = '<p>Aucun manga recommandé trouvé.</p>';
+        recommendedDiv.innerHTML = "<p>Aucun manga recommandé trouvé.</p>";
         return;
     }
 
-    recommendedMangas.forEach(manga => {
-
-        const card = document.createElement('div');
-        card.className = 'card';
+    recommendedMangas.forEach((manga) => {
+        const card = document.createElement("div");
+        card.className = "card";
 
         // Créer les badges de genres
-        const genresBadges = manga.genres.map(genre =>
-            `<span class="genre-badge">${genre}</span>`
-        ).join('');
+        const genresBadges = manga.genres
+            .map((genre) => `<span class="genre-badge">${genre}</span>`)
+            .join("");
 
         card.innerHTML = `
-            <button class="${nameToSlug(manga.title)}" onclick='window.location.href = "./html/manga.html?slug=${nameToSlug(manga.title)}"'>
-                <img class="cover" src="${manga.image_url}" alt="${manga.title}">
+            <button class="${nameToSlug(
+            manga.title
+        )}" onclick='window.location.href = "./html/manga.html?slug=${nameToSlug(
+            manga.title
+        )}"'>
+                <img class="cover" src="${manga.image_url}" alt="${manga.title
+            }">
                 <p class="title">${manga.title}</p>
                 <div class="genres">
                     ${genresBadges}
@@ -190,75 +203,84 @@ function scrollCarousel(section, direction) {
 
     carousel.scrollBy({
         left: direction * scrollAmount,
-        behavior: 'smooth'
+        behavior: "smooth",
     });
 }
 
 function nameToSlug(name) {
-    return encodeURIComponent(name)
+    return encodeURIComponent(name);
 }
 
 function displaySearchResults(results) {
-    const searchResults = document.getElementById('searchResults');
-    const searchResultsContent = document.querySelector('.search-results-content');
-    
+    const searchResults = document.getElementById("searchResults");
+    const searchResultsContent = document.querySelector(
+        ".search-results-content"
+    );
+
     if (results.length === 0) {
-        searchResultsContent.innerHTML = '<p style="color: #fff; text-align: center; grid-column: 1 / -1;">Aucun manga trouvé.</p>';
+        searchResultsContent.innerHTML =
+            '<p style="color: #fff; text-align: center; grid-column: 1 / -1;">Aucun manga trouvé.</p>';
     } else {
-        searchResultsContent.innerHTML = results.map(manga => `
-            <div class="search-result-item" onclick="window.location.href = './html/manga.html?slug=${nameToSlug(manga.title)}'">
+        searchResultsContent.innerHTML = results
+            .map(
+                (manga) => `
+            <div class="search-result-item" onclick="window.location.href = './html/manga.html?slug=${nameToSlug(
+                    manga.title
+                )}'">
                 <img src="${manga.imageUrl}" alt="${manga.title}">
                 <p class="title">${manga.title}</p>
             </div>
-        `).join('');
+        `
+            )
+            .join("");
     }
-    
-    searchResults.style.display = 'block';
-    searchResults.scrollIntoView({ behavior: 'smooth' });
+
+    searchResults.style.display = "block";
+    searchResults.scrollIntoView({ behavior: "smooth" });
 }
 
 function closeSearchResults() {
-    const searchResults = document.getElementById('searchResults');
-    const searchInput = document.getElementById('searchInput');
-    
-    searchResults.style.display = 'none';
-    searchInput.value = '';
+    const searchResults = document.getElementById("searchResults");
+    const searchInput = document.getElementById("searchInput");
+
+    searchResults.style.display = "none";
+    searchInput.value = "";
 }
 
 function performSearch() {
-    const searchInput = document.getElementById('searchInput');
+    const searchInput = document.getElementById("searchInput");
     const query = searchInput.value.trim();
-    
+
     if (query) {
-        searchManga(query).then(results => {
+        searchManga(query).then((results) => {
             displaySearchResults(results);
         });
     }
 }
 
-window.addEventListener('DOMContentLoaded', async () => {
+window.addEventListener("DOMContentLoaded", async () => {
     await displayRecommended();
     await displayClassic();
     await displayLast();
-    
+
     // Configuration de la barre de recherche
-    const searchInput = document.getElementById('searchInput');
-    const searchButton = document.getElementById('searchButton');
+    const searchInput = document.getElementById("searchInput");
+    const searchButton = document.getElementById("searchButton");
 
     if (searchButton) {
-        searchButton.addEventListener('click', performSearch);
+        searchButton.addEventListener("click", performSearch);
     }
 
     if (searchInput) {
-        searchInput.addEventListener('keypress', (event) => {
-            if (event.key === 'Enter') {
+        searchInput.addEventListener("keypress", (event) => {
+            if (event.key === "Enter") {
                 performSearch();
             }
         });
-        
+
         // Fermer les résultats si on clique sur Escape
-        searchInput.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape') {
+        searchInput.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") {
                 closeSearchResults();
             }
         });
