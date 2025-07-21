@@ -17,7 +17,7 @@
    HEADER LECTEUR
    ============================================== */
 
-.header {
+.reader-header {
     background: var(--glass-light);
     backdrop-filter: blur(14px);
     border-radius: var(--radius-xl);
@@ -28,7 +28,7 @@
     animation: fadeInUp var(--transition-slow) ease-out;
 }
 
-.header h1 {
+.reader-header h1 {
     font-size: 2rem;
     font-weight: var(--font-weight-bold);
     color: var(--text-primary);
@@ -218,6 +218,7 @@
         opacity: 0;
         transform: translateY(30px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -232,43 +233,43 @@
     .main {
         padding: var(--spacing-md);
     }
-    
-    .header {
+
+    .reader-header {
         padding: var(--spacing-lg);
     }
-    
-    .header h1 {
+
+    .reader-header h1 {
         font-size: 1.5rem;
         margin-bottom: var(--spacing-md);
     }
-    
+
     .nav {
-        flex-direction: column;
+        flex-wrap: wrap;
         gap: var(--spacing-sm);
     }
-    
+
     .nav a,
     .nav span {
         width: 100%;
         min-width: auto;
         padding: var(--spacing-md) var(--spacing-lg);
     }
-    
+
     .chapter-select {
         width: 100%;
         min-width: auto;
         padding: var(--spacing-md) calc(var(--spacing-lg) + 24px) var(--spacing-md) var(--spacing-lg);
     }
-    
+
     .scan-images {
         padding: var(--spacing-lg);
         gap: var(--spacing-xs);
     }
-    
+
     .scan-image {
         border-radius: var(--radius-small);
     }
-    
+
     .scroll-to-top {
         width: 45px;
         height: 45px;
@@ -282,35 +283,35 @@
     .main {
         padding: var(--spacing-sm);
     }
-    
-    .header {
+
+    .reader-header {
         padding: var(--spacing-md);
         margin-bottom: var(--spacing-lg);
     }
-    
-    .header h1 {
+
+    .reader-header h1 {
         font-size: 1.25rem;
         line-height: 1.4;
     }
-    
+
     .scan-images {
         padding: var(--spacing-md);
         border-radius: var(--radius-medium);
     }
-    
+
     .nav a,
     .nav span {
         font-size: 0.9rem;
         padding: var(--spacing-sm) var(--spacing-md);
     }
-    
+
     .chapter-select {
         font-size: 0.9rem;
         padding: var(--spacing-sm) calc(var(--spacing-md) + 24px) var(--spacing-sm) var(--spacing-md);
         background-size: 14px;
         background-position: right 10px center;
     }
-    
+
     .scroll-to-top {
         width: 40px;
         height: 40px;
@@ -325,7 +326,8 @@
    ============================================== */
 
 @media (prefers-reduced-motion: reduce) {
-    .header,
+
+    .reader-header,
     .scan-images,
     .nav a,
     .scan-image,
@@ -334,7 +336,7 @@
         animation: none;
         transition: none;
     }
-    
+
     .nav a:hover,
     .scan-image:hover,
     .chapter-select:hover,
@@ -358,17 +360,17 @@
    ============================================== */
 
 @media print {
-    .header .nav {
+    .reader-header .nav {
         display: none;
     }
-    
+
     .scan-images {
         background: none;
         border: none;
         box-shadow: none;
         padding: 0;
     }
-    
+
     .scan-image {
         box-shadow: none;
         page-break-inside: avoid;

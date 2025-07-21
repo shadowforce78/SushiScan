@@ -41,10 +41,10 @@ async function getMaxChapter(mangaName, scanType) {
 
 async function createHeader() {
     const header = document.createElement('header');
-    header.classList.add('header');
+    header.classList.add('reader-header');
 
     const title = document.createElement('h1');
-    title.textContent = `Lecture de ${mangaName} - Chapitre ${chapter}`;
+    title.textContent = `${mangaName} - Chapitre ${chapter}`;
     header.appendChild(title);
 
     const nav = document.createElement('nav');
@@ -52,7 +52,7 @@ async function createHeader() {
 
     const backLink = document.createElement('a');
     backLink.href = `../html/manga.html?slug=${encodeURIComponent(mangaName)}`;
-    backLink.textContent = 'Retour à la liste des chapitres';
+    backLink.textContent = 'Retour';
     nav.appendChild(backLink);
 
     // Navigate to the previous chapter or the next chapter
