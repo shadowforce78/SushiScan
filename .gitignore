@@ -4,3 +4,5 @@ android
 build.bat
 resources/android/**/*
 sushiscan.jks
+sushiscan-release.apk.idsig
+sushiscan-release.apk
